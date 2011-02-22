@@ -1,6 +1,6 @@
 import json
+import code
 import io
-
 
 # This is the example configuration for an example ship
 # Most of these stats may or may not make any sense as we work
@@ -27,16 +27,22 @@ _exampleconfiguration = {
     ],
     "navlights":[(25,0,25),(-25,0,25)],
 }
+_examplejson = json.dumps(_exampleconfiguration)
+
+
 class Ship(object):
     """The basic core ship class in Sidereal."""
     def __init__(self):
         pass
 
     @classmethod
-    def create_from_config(cls, config):
-        """Given a configparser that has already read a ship configuration
-        file, builds a new Ship object, and returns it."""
-        pass
+    def create_from_json(cls, jsonstr):
+        """Given a json string, builds a new Ship object, and returns it."""
+        d = json.loads(jsonstr)
+        code.interact("ZOMG",raw_input,locals())
+        newship = cls()
+        newship.__dict__.update(d)
+        return newship
 
 if __name__=='__main__':
-    pass
+    ship = Ship.create_from_json(_examplejson)
