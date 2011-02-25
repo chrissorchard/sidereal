@@ -3,15 +3,11 @@ in which all ingame object occupy. It should keep track of all in-game
 related objects, such as ships, explosions, projectiles, and so on, or be
 able to keep track of them on demand."""
 
-__all__ = ["Universe","foo","bar","get_unique_id"]
+__all__ = ["Universe","get_unique_id"]
 
 class Universe(object):
     def __init__(self):
         self._id = 0
-    def foo(self):
-        pass
-    def bar(self):
-        pass
     def get_unique_id(self):
         id = self._id
         self.id += 1
@@ -21,6 +17,4 @@ class Universe(object):
 # functions as module-level functions. The user can create their own
 # Universe() instance if they like
 _inst = Universe()
-foo = _inst.foo
-bar = _inst.bar
 get_unique_id = _inst.get_unique_id
