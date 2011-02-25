@@ -10,7 +10,7 @@ class Universe(object):
         self._id = 0
     def get_unique_id(self):
         id = self._id
-        self.id += 1
+        self._id += 1
         return id
 
 # inspired by python's random module, create one instance, and export its
