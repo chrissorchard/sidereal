@@ -69,5 +69,8 @@ class FlightHelper(list):
         # For a placeholder, apply the maximum given thrust, (divded by 60) in the
         # direction of our orientation.
         # pchooooo >[ ]
+        totalthrust = 0
+        for engine in ship.engines:
+            totalthrust += engine['thrust']
 
 
