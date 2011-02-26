@@ -1,7 +1,7 @@
 import time
 
-import bullet
-from bullet import Vector3
+import bullet.bullet as bullet
+Vector3 = bullet.Vector3
 
 class Ball(bullet.RigidBody,object):
     def __init__(self,origin=bullet.Vector3(0,100,0)):
