@@ -3,7 +3,7 @@ import logging
 import code
 import io
 
-import universe
+import sidereal.universe
 
 # Basically, we may have loggers in the ship.* hierachy, but by default
 # we're not going to listen to them. If you change your mind, you'll
