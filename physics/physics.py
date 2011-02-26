@@ -11,9 +11,9 @@ class PhysicsComponent(object):
         #given a ridgid body, store a reference to it
         self.body = body
     def apply_force(self,force,relpos=None):
-    """Apply force to the object. For a ship, this should only be in the
-    appropriate direction that makes sense for the engines, and NOT
-    arbitrary."""
+        """Apply force to the object. For a ship, this should only be in the
+        appropriate direction that makes sense for the engines, and NOT
+        arbitrary."""
         if relpos is None:
             self.body.applyCentralForce(force)
         else:
@@ -30,7 +30,7 @@ class FlightHelper(list):
     
     """
     def __init__(self):
-        super().__init__(self)
+        list.__init__(self)
     def tick(self,ship):
         # This method should be called on each Physics tick
 
