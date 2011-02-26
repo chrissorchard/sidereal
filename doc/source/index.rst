@@ -12,6 +12,7 @@ Contents:
    :maxdepth: 2
 
    overview
+   gameloop
 
 Indices and tables
 ==================
