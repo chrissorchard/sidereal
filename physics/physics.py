@@ -18,6 +18,9 @@ class PhysicsComponent(object):
             self.body.applyCentralForce(force)
         else:
             self.body.applyForce(force,relpos)
+    @property
+    def orientation(self):
+        return self.body.getOrientation()
 
 class FlightHelper(list):
     """Given a sequence of waypoints, the FlightHelper will call
@@ -28,7 +31,7 @@ class FlightHelper(list):
     """
     def __init__(self):
         super().__init__(self)
-    def tick(self):
+    def tick(self,ship):
         # This method should be called on each Physics tick
 
         # Do we have any waypoints? If not, then return
@@ -59,3 +62,12 @@ class FlightHelper(list):
         # It's likely that different set of methods will have to be used
         # for a ship that doesn't use rear engines + gimal or rotation
         # thrusters
+    def fire_all_engines(self,ship):
+        # Try our best to determine where the placement of
+        # the engines on the ship are.
+
+        # For a placeholder, apply the maximum given thrust, (divded by 60) in the
+        # direction of our orientation.
+        # pchooooo >[ ]
+
+
