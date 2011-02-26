@@ -1,6 +1,15 @@
 import json
+import logging
 import code
 import io
+
+import universe
+
+# Basically, we may have loggers in the ship.* hierachy, but by default
+# we're not going to listen to them. If you change your mind, you'll
+# need to add additional handlers
+_nullhandler = logging.NullHandler()
+logging.getLogger("ship").addHandler(_nullhandler)
 
 # This is the example configuration for an example ship
 # Most of these stats may or may not make any sense as we work
@@ -32,8 +41,14 @@ _examplejson = json.dumps(_exampleconfiguration)
 
 class Ship(object):
     """The basic core ship class in Sidereal."""
-    def __init__(self):
-        pass
+    def __init__(self,myuniverse=None):
+        if myuniverse is None:
+            # If we haven't been passed an instance of the universe
+            # use the module's already instantiated instance
+            myuniverse = universe
+
+        self.id = myuniverse.get_unique_id()
+        self.logger = logging.getLogger("ship.{}".format(self.id))
 
     @classmethod
     def create_from_json(cls, jsonstr):
@@ -43,6 +58,7 @@ class Ship(object):
         newship = cls()
         newship.__dict__.update(d)
         return newship
+
 
 if __name__=='__main__':
     ship = Ship.create_from_json(_examplejson)
