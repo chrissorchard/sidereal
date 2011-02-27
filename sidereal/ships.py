@@ -45,7 +45,7 @@ class Ship(object):
         if myuniverse is None:
             # If we haven't been passed an instance of the universe
             # use the module's already instantiated instance
-            myuniverse = universe
+            myuniverse = sidereal.universe
 
         self.id = myuniverse.get_unique_id()
         self.logger = logging.getLogger("ship.{}".format(self.id))
