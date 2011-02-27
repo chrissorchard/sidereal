@@ -54,7 +54,6 @@ class Ship(object):
     def create_from_json(cls, jsonstr):
         """Given a json string, builds a new Ship object, and returns it."""
         d = json.loads(jsonstr)
-        code.interact("ZOMG",raw_input,locals())
         newship = cls()
         newship.__dict__.update(d)
         return newship
