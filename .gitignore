@@ -32,6 +32,9 @@ pip-log.txt
 .coverage
 .tox
 
+# Manifest file
+MANIFEST
+
 ## OSX.gitignore ##
 .DS_Store?
 Icon?
