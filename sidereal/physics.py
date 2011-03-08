@@ -72,5 +72,6 @@ class FlightHelper(list):
         totalthrust = 0
         for engine in ship.engines:
             totalthrust += engine['thrust']
-
-
+        direction = ship.physics.getOrientation()
+        force = direction * totalthrust
+        ship.physics.applyCentralForce(force)
