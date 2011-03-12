@@ -16,6 +16,8 @@ class Display(collections.MutableSet):
         self.screen = turtle.Screen()
         self.screen.tracer(False)
 
+        self.autocoord = False
+
     def add(self,o):
         self._tracked.add(o)
         aturtle = self._new_turtle()
@@ -23,6 +25,7 @@ class Display(collections.MutableSet):
         aturtle.color(*triple_float(o))
         aturtle.setposition(x,y)
         aturtle.pendown()
+        aturtle.just_printed_coord = False
 
         self._turtlemap[o] = aturtle
 
@@ -39,14 +42,28 @@ class Display(collections.MutableSet):
 
     def draw(self):
         for tracked,aturtle in self._turtlemap.items():
+            if self.autocoord == True:
+                if aturtle.just_printed_coord == True:
+                    aturtle.undo()
+                    aturtle.just_printed_coord = False
+
             x,y,z = tracked.coord
             aturtle.settiltangle(aturtle.towards(x,y))
             aturtle.setposition(x,y)
+
+            if self.autocoord == True:
+                self.print_tracked_coord(tracked,aturtle)
+                aturtle.just_printed_coord = True
+
+        # after going through all the turtles, update the screen
         self.screen.update()
     def print_coord(self):
         for tracked,aturtle in self._turtlemap.items():
-            x,y,z = tracked.coord
-            aturtle.write("({},{},{})".format(x,y,z))
+            self.print_tracked_coord(tracked,aturtle)
+
+    def print_tracked_coord(self,tracked,aturtle):
+        x,y,z = tracked.coord
+        aturtle.write("({},{},{})".format(int(x),int(y),int(z)))
 
     def _new_turtle(self):
         # if it's empty
