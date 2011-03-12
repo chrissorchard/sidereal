@@ -16,6 +16,8 @@ class Display(collections.MutableSet):
         self.screen = turtle.Screen()
         self.screen.tracer(False)
 
+        self.selectedaxis = (0,1)
+
         self.autocoord = False
 
     def add(self,o):
@@ -48,8 +50,12 @@ class Display(collections.MutableSet):
                     aturtle.just_printed_coord = False
 
             x,y,z = tracked.coord
-            aturtle.settiltangle(aturtle.towards(x,y))
-            aturtle.setposition(x,y)
+            # selects the axis for x, which we'll call X, and
+            # the axis for Y
+            X = tracked.coord[self.selectedaxis[0]]
+            Y = tracked.coord[self.selectedaxis[1]]
+            aturtle.settiltangle(aturtle.towards(X,Y))
+            aturtle.setposition(X,Y)
 
             if self.autocoord == True:
                 self.print_tracked_coord(tracked,aturtle)
