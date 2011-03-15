@@ -26,6 +26,16 @@ class Display(collections.MutableSet):
         # If empty, no coords of any type are printed.
         self.autocoord_display = {}
 
+        # Method of determining turtle tilt
+        # Our turtles are not actually rotated that a call to say,
+        # t.fd(100) would be altered, but the angle in which they
+        # appear to be pointing. Valid:
+        # 'lastmovement' - The tilt is pointing in the direction in which
+        # the turtle is moving
+        # 'rotation' - The tilt is pointing how the tracked object is
+        # pointing. Requires tracked to have a .quaternion attr
+        self.tilt_type = 'lastmovement'
+
     def add(self,o):
         self._tracked.add(o)
         aturtle = self._new_turtle()
@@ -55,12 +65,9 @@ class Display(collections.MutableSet):
                     aturtle.undo()
                     aturtle.just_printed_coord = False
 
-            x,y,z = tracked.coord
-            # selects the axis for x, which we'll call X, and
-            # the axis for Y
-            X = tracked.coord[self.selectedaxis[0]]
-            Y = tracked.coord[self.selectedaxis[1]]
-            aturtle.settiltangle(aturtle.towards(X,Y))
+            X,Y = self.selected_axis_components(tracked.coord)
+
+            self.set_turtle_tilt(tracked,aturtle)
             aturtle.setposition(X,Y)
 
             if self.autocoord_display != {}:
@@ -72,6 +79,14 @@ class Display(collections.MutableSet):
 
         # after going through all the turtles, update the screen
         self.screen.update()
+
+    def set_turtle_tilt(self,tracked,aturtle):
+        X,Y = self.selected_axis_components(tracked.coord)
+        if self.tilt_type == 'lastmovement':
+            aturtle.settiltangle(aturtle.towards(X,Y))
+        elif self.tilt_type == 'rotation':
+            pass
+
     def print_coord(self):
         for tracked,aturtle in self._turtlemap.items():
             self.print_tracked_coord(tracked,aturtle)
@@ -98,6 +113,14 @@ class Display(collections.MutableSet):
     def _jitter_all(self):
         for i in self:
             i.jitter()
+
+    def selected_axis_components(self,coord):
+        # selects the axis for x, which we'll call X, and
+        # the axis for Y
+        X = coord[self.selectedaxis[0]]
+        Y = coord[self.selectedaxis[1]]
+        return X,Y
+
 
     #boring required methods
     def __len__(self):
