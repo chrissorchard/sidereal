@@ -3,11 +3,11 @@ import collections
 import math
 
 class PhysicsObject(object):
-    def __init__(self,world):
+    def __init__(self,world,mass=1.0):
         self.body = ode.Body(world)
         self.mass = ode.Mass()
         self.mass.setSphere(2500.0, 0.05)
-        self.mass.mass = 1.0
+        self.mass.mass = mass
         self.body.setMass(self.mass)
     @property
     def coord(self):
