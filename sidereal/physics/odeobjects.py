@@ -12,6 +12,10 @@ class PhysicsObject(object):
     @property
     def coord(self):
         return self.body.getPosition()
+
+    @property
+    def quaternion(self):
+        return self.body.getQuaternion()
         
 
 class PhysicsWorld(ode.World):

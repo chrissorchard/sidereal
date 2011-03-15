@@ -18,7 +18,13 @@ class Display(collections.MutableSet):
 
         self.selectedaxis = (0,1)
 
-        self.autocoord = False
+        # The types of coordinates to display. Possible are:
+        # 'coord' is x,y,z coordinates
+        # 'quaternion' is the w,x,y,z rotation, and relies on the
+        # objects added to the display having a .quaternion attr
+        #
+        # If empty, no coords of any type are printed.
+        self.autocoord_display = {}
 
     def add(self,o):
         self._tracked.add(o)
@@ -44,7 +50,7 @@ class Display(collections.MutableSet):
 
     def draw(self):
         for tracked,aturtle in self._turtlemap.items():
-            if self.autocoord == True:
+            if self.autocoord_display != {}:
                 if aturtle.just_printed_coord == True:
                     aturtle.undo()
                     aturtle.just_printed_coord = False
@@ -57,8 +63,11 @@ class Display(collections.MutableSet):
             aturtle.settiltangle(aturtle.towards(X,Y))
             aturtle.setposition(X,Y)
 
-            if self.autocoord == True:
-                self.print_tracked_coord(tracked,aturtle)
+            if self.autocoord_display != {}:
+                if 'coord' in self.autocoord_display:
+                    self.print_tracked_coord(tracked,aturtle)
+                if 'quaternion' in self.autocoord_display:
+                    self.print_tracked_quaternion(tracked,aturtle)
                 aturtle.just_printed_coord = True
 
         # after going through all the turtles, update the screen
@@ -69,7 +78,13 @@ class Display(collections.MutableSet):
 
     def print_tracked_coord(self,tracked,aturtle):
         x,y,z = tracked.coord
-        aturtle.write("({},{},{})".format(int(x),int(y),int(z)))
+        #aturtle.write("({},{},{})".format(int(x),int(y),int(z)))
+        aturtle.write("({},{},{})".format(x,y,z))
+
+    def print_tracked_quaternion(self,tracked,aturtle):
+        w,x,y,z = tracked.quaternion
+        aturtle.write("({},{},{},{})".format(w,x,y,z),
+                     align='left')
 
     def _new_turtle(self):
         # if it's empty

@@ -19,7 +19,7 @@ import sidereal.physics.odeobjects as odeobjects
 import sidereal.turtles as turtles
 
 d = turtles.Display()
-d.autocoord = True
+d.autocoord_display = {'coord'}
 world = odeobjects.PhysicsWorld()
 
 world.setGravity((0,-9.81,0))
