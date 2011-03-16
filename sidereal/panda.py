@@ -10,6 +10,7 @@ import math
 
 # third party
 import panda3d.core
+import direct.showbase.ShowBase
 import direct.task
 
 # internal
@@ -195,3 +196,28 @@ class FocusManager(collections.MutableSet):
         avz /= len(self)
         print avx,avy,avz
         return (avx,avy,avz)
+
+
+class PandaEngine(direct.showbase.ShowBase.ShowBase):
+    def __init__(self):
+        direct.showbase.ShowBase.ShowBase.__init__(self)
+
+class ShipNode(object)
+    """
+    Assuming that a created ship has a .coord and .quaternion attributes
+    (which may talk to its own .physics instance, or be set for "artifical"
+    ships that a client has, it associates it with a model, places it in the
+    scene, and has a method for updating its place in the scene.
+    """
+    def __init__(self,ship,engine,model="models/industrial"):
+        self.ship = ship
+        self.nodepath = engine.loadModel(model)
+        self.nodepath.reparentTo(engine.render)
+
+    def physics_update(self):
+        coord = self.ship.coord
+        quaternion = self.ship.quaternion
+        # setPos takes (x,y,z), and our coord is a tuple, so we need to
+        # unpack the coordinates
+        self.nodepath.setPos(*coord)
+        self.nodepath.setQuat(panda3d.core.Quat(*quaternion))

@@ -58,6 +58,9 @@ class Ship(object):
         newship.__dict__.update(d)
         return newship
 
+    def __hash__(self):
+        return hash(self.id)
+
 
 if __name__=='__main__':
     ship = Ship.create_from_json(_examplejson)
