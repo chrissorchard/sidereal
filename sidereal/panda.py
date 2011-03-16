@@ -195,18 +195,3 @@ class FocusManager(collections.MutableSet):
         avz /= len(self)
         print avx,avy,avz
         return (avx,avy,avz)
-
-
-def _main():
-    import misc.teapot
-    import direct.showbase.ShowBase
-    base = direct.showbase.ShowBase.ShowBase()
-    base.disableMouse()
-    screen = misc.teapot.TeapotScreen(base)
-    screen.background()
-    screen.teapot()
-    screen.lights()
-    mainview = MainView(base)
-    base.win.getDisplayRegions()[1].setCamera(mainview.camera_np)
-if __name__=='__main__':
-    _main()
