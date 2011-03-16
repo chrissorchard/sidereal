@@ -202,7 +202,7 @@ class PandaEngine(direct.showbase.ShowBase.ShowBase):
     def __init__(self):
         direct.showbase.ShowBase.ShowBase.__init__(self)
 
-class ShipNode(object)
+class ShipNode(object):
     """
     Assuming that a created ship has a .coord and .quaternion attributes
     (which may talk to its own .physics instance, or be set for "artifical"
