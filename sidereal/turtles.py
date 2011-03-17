@@ -2,10 +2,14 @@ import turtle
 import collections
 import random
 
-def triple_float(seed):
+def triple_float(seed,alpha=False):
     r = random.Random()
     r.seed(seed)
-    return r.random(), r.random(), r.random()
+    if alpha:
+        return r.random(), r.random(), r.random(), r.random()
+    else:
+        return r.random(), r.random(), r.random()
+
 
 class Display(collections.MutableSet):
     def __init__(self):

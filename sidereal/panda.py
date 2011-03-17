@@ -15,6 +15,8 @@ import direct.task
 
 # internal
 
+from sidereal.turtles import triple_float
+
 
 # One thing I'm wondering about, is whether we implement the gui overlay
 # in a seperate space. How does it intercept the clicks, and know which one
@@ -46,7 +48,7 @@ class MainView(object):
         
         # where max, is maximum zoom out
         # where min, is minimum zoon in
-        self.maxzoom = 200
+        self.maxzoom = 300
         self.minzoom = 10
         
         # setting sensitivity to negative inverts the axis
@@ -81,7 +83,7 @@ class MainView(object):
         x = self.base.mouseWatcherNode.getMouseX()
         y = self.base.mouseWatcherNode.getMouseY()
 
-        print x,y
+        #print x,y
 
         # If the coords are empty, then skip this whole block
         if self.mouse_coords is ():
@@ -91,7 +93,7 @@ class MainView(object):
         dx = self.mouse_coords[0] - x
         dy = self.mouse_coords[1] - y
 
-        print dx,dy
+        #print dx,dy
 
         # then based on the dx,dy move the mainview's camera around its
         # focused point. Preferable moving the mouse left, also rotates
@@ -110,7 +112,7 @@ class MainView(object):
             
         self.mouse_coords = (x,y) 
 
-        print self.spherepoint
+        #print self.spherepoint
 
         self.camera_np.setPos(*self.spherepoint.calculate())
         self.camera_np.lookAt((0,0,0))
@@ -194,7 +196,7 @@ class FocusManager(collections.MutableSet):
         avx /= len(self)
         avy /= len(self)
         avz /= len(self)
-        print avx,avy,avz
+        #print avx,avy,avz
         return (avx,avy,avz)
 
 
@@ -209,10 +211,41 @@ class ShipNode(object):
     ships that a client has, it associates it with a model, places it in the
     scene, and has a method for updating its place in the scene.
     """
-    def __init__(self,ship,engine,model="models/industrial"):
+    def __init__(self,ship,engine,model="models/teapot"):
         self.ship = ship
-        self.nodepath = engine.loadModel(model)
+        self.nodepath = engine.loader.loadModel(model)
         self.nodepath.reparentTo(engine.render)
+
+        self.engine = engine
+        self._debuglight = False
+
+    def _get_debuglight(self):
+        return self._debuglight
+
+    def _set_debuglight(self,value):
+        if value == True and self._debuglight == False:
+            # turn on the light
+            light = panda3d.core.PointLight("my light")
+            color = triple_float(hash(self.ship),alpha=True)
+            light.setColor(color)
+            light.setAttenuation((0,0,0.01))
+            self.lightnodepath = self.nodepath.attachNewNode(light)
+            self.lightnodepath.setPos(0, 0, 10)
+            self.engine.render.setLight(self.lightnodepath)
+
+            # and set it so we're flagged as on
+            self._debuglight = True
+        elif value == False and self._debuglight == True:
+            # if the lights on, turn it off, otherwise
+            self._debuglight = False
+
+            self.lightnodepath.detachNode()
+            self.engine.render.clearLight(self.lightnodepath)
+            self.lightnodepath.removeNode()
+
+            # set if so we're flagged as off
+
+    debuglight = property(_get_debuglight, _set_debuglight)
 
     def physics_update(self):
         coord = self.ship.coord
