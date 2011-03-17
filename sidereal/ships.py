@@ -58,6 +58,28 @@ class Ship(object):
         newship.__dict__.update(d)
         return newship
 
+    def __hash__(self):
+        return hash(self.id)
+
+class PhysicsShip(Ship):
+    def __init__(self,physics,myuniverse=None):
+        Ship.__init__(self,myuniverse)
+        self.physics = physics
+    @classmethod
+    def create_from_json(cls, jsonstr, physics):
+        ship = super(Ship,cls).create_from_json(jsonstr)
+        ship.physics = physics
+
+        return ship
+
+    @property
+    def coord(self):
+        return self.physics.coord
+    @property
+    def quaternion(self):
+        return self.physics.quaternion
+
+    
 
 if __name__=='__main__':
     ship = Ship.create_from_json(_examplejson)
