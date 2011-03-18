@@ -20,11 +20,11 @@ physicsworld = odeobjects.PhysicsWorld()
 shipnodes = []
 
 for i in range(10):
-    if i == 1:
+    if i == 0:
         pos = (0,0,0)
     else:
         pos = [random.randint(-100,100) for x in range(3)]
-    physics = odeobjects.PhysicsObject(physicsworld,1000)
+    physics = odeobjects.PhysicsObject(physicsworld,100)
     physics.body.setPosition(tuple(pos))
     ship = ships.PhysicsShip(physics)
     shipnode = panda.ShipNode(ship,engine)
@@ -38,8 +38,55 @@ for region in engine.win.getDisplayRegions():
 def update_physics(task):
     for shipnode in shipnodes:
         shipnode.physics_update()
-    physicsworld.step(0.04)
+    physicsworld.step(0.01)
     return task.again
 
-engine.taskMgr.doMethodLater(0.04,update_physics,"physics")
+class ThrusterEngineControl(object):
+    def __init__(self,engine,physicsobject):
+        self.physicsobject = physicsobject
+        self.engine = engine
+        self.engine.accept("arrow_up",self.task_modify,['up',True])
+        self.engine.accept("arrow_up-up",self.task_modify,['up',False])
+        self.engine.accept("arrow_left",self.task_modify,['left',True])
+        self.engine.accept("arrow_left-up",self.task_modify,['left',False])
+        self.engine.accept("arrow_right",self.task_modify,['right',True])
+        self.engine.accept("arrow_right-up",self.task_modify,['right',False])
+
+    def task_modify(self,task,state):
+        if task == "up":
+            if state:
+                self.engine.taskMgr.doMethodLater(0.01,self.forward,
+                                                  'forwardtask')
+            else:
+                self.engine.taskMgr.remove('forwardtask')
+        elif task == "left":
+            if state:
+                self.engine.taskMgr.doMethodLater(0.01,self.left,
+                                                  'lefttask')
+            else:
+                self.engine.taskMgr.remove('lefttask')
+        elif task == "right":
+            if state:
+                self.engine.taskMgr.doMethodLater(0.01,self.right,
+                                                  'righttask')
+            else:
+                self.engine.taskMgr.remove('righttask')
+
+    def forward(self,task):
+        self.physicsobject.body.addRelForce((100,0,0))
+        print "Forward."
+        return task.again
+
+    def left(self,task):
+        self.physicsobject.body.addRelTorque((0,0,0.5))
+        print "Left."
+        return task.again
+
+    def right(self,task):
+        self.physicsobject.body.addRelTorque((-0,-0,-0.5))
+        print "Right."
+        return task.again
+
+thrustercontrol = ThrusterEngineControl(engine,shipnodes[0].ship.physics)
+engine.taskMgr.doMethodLater(0.01,update_physics,"physics")
 engine.run()
