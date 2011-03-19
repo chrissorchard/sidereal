@@ -47,7 +47,7 @@ class Ship(object):
             # use the module's already instantiated instance
             myuniverse = sidereal.universe
 
-        self.id = myuniverse.get_unique_id()
+        self.id = myuniverse.get_unique_id(self)
         self.logger = logging.getLogger("ship.{}".format(self.id))
 
     @classmethod
