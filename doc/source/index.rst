@@ -13,6 +13,8 @@ Contents:
 
    overview
    gameloop
+   ships
+
 
 Indices and tables
 ==================
