@@ -89,4 +89,9 @@ class ThrusterEngineControl(object):
 
 thrustercontrol = ThrusterEngineControl(engine,shipnodes[0].ship.physics)
 engine.taskMgr.doMethodLater(0.01,update_physics,"physics")
-engine.run()
+
+# making it easier to call when running interactively, for testing
+step = engine.taskMgr.step
+while True:
+    # same as engine.run()
+    step()
