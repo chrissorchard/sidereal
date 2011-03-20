@@ -6,6 +6,9 @@
 Welcome to sidereal's documentation!
 ====================================
 
+:Release: |version|
+:Date: |today|
+
 Contents:
 
 .. toctree::
