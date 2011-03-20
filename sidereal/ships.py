@@ -8,7 +8,14 @@ import sidereal.universe
 # Basically, we may have loggers in the ship.* hierachy, but by default
 # we're not going to listen to them. If you change your mind, you'll
 # need to add additional handlers
-_nullhandler = logging.NullHandler()
+try:
+    _nullhandler = logging.NullHandler()
+except AttributeError:
+    class _NullHandler(logging.Handler):
+        def emit(self, record):
+            pass
+    _nullhandler = _NullHandler()
+
 logging.getLogger("ship").addHandler(_nullhandler)
 
 # This is the example configuration for an example ship
@@ -48,7 +55,7 @@ class Ship(object):
             myuniverse = sidereal.universe
 
         self.id = myuniverse.get_unique_id(self)
-        self.logger = logging.getLogger("ship.{}".format(self.id))
+        self.logger = logging.getLogger("ship.{0}".format(self.id))
 
     @classmethod
     def create_from_json(cls, jsonstr):
