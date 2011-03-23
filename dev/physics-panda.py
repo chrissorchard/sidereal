@@ -1,4 +1,9 @@
 import random
+import math
+import readline
+import code
+
+random.seed(0)
 
 import panda3d.core
 
@@ -35,8 +40,22 @@ mainview = sidereal.panda.MainView(base)
 for region in engine.win.getDisplayRegions():
     region.setCamera(mainview.camera_np)
 
+def anglexyz(q):
+    q1,q2,q3,q4 = q
+    halftheta = math.acos(q4)
+    x = q1 / math.sin(halftheta)
+    y = q2 / math.sin(halftheta)
+    z = q3 / math.sin(halftheta)
+    print "%.2f %.2f %.2f %.2f" % (x,y,z,math.degrees(halftheta*2))
+
 def update_physics(task):
     for shipnode in shipnodes:
+        if shipnode is shipnodes[0]:
+            #w,x,y,z = shipnode.ship.quaternion
+            #W,X,Y,Z = math.asin(w),math.asin(x),math.asin(y),math.asin(z)
+            #print math.degrees(W),math.degrees(X),math.degrees(Y),math.degrees(Z)
+            anglexyz(shipnode.ship.quaternion)
+
         shipnode.physics_update()
     physicsworld.step(0.01)
     return task.again
@@ -74,18 +93,23 @@ class ThrusterEngineControl(object):
 
     def forward(self,task):
         self.physicsobject.body.addRelForce((100,0,0))
-        print "Forward."
+        #print "Forward."
         return task.again
 
     def left(self,task):
         self.physicsobject.body.addRelTorque((0,0,0.5))
         print "Left."
+        #print self.physicsobject.quaternion
         return task.again
 
     def right(self,task):
         self.physicsobject.body.addRelTorque((-0,-0,-0.5))
         print "Right."
+        #print self.physicsobject.quaternion
         return task.again
+
+# code interject
+engine.accept("c",code.interact,['Interpreter: ',raw_input,locals()])
 
 thrustercontrol = ThrusterEngineControl(engine,shipnodes[0].ship.physics)
 engine.taskMgr.doMethodLater(0.01,update_physics,"physics")

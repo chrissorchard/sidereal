@@ -11,6 +11,17 @@ def rotate_diff(one,two):
     q = one.quaternion
     dest = two.coord
 
+    # this is a GOD AWFUL method of doing it
+    from panda3d.core import NodePath
+    foo = NodePath("foo")
+    bar = NodePath("bar")
+
+    foo.setPos(one.coord)
+    bar.setPos(two.coord)
+    foo.lookAt(bar)
+    return tuple(foo.getQuat())
+    
+
 
 class CrudeNav(object):
     """A fairly poor form of navigation that does the following:
@@ -24,7 +35,8 @@ if __name__=='__main__':
         pass
     one = O()
     one.coord = (0,0,0)
-    one.quaternion (1,0,0,0)
+    one.quaternion = (1,0,0,0)
     two = O()
     two.coord = (20,-40,60)
+    print rotate_diff(one,two)
 
