@@ -2,15 +2,16 @@ import random
 import math
 import readline
 import code
-
 random.seed(0)
 
 import panda3d.core
+import ode
 
 import sidereal.panda as panda
 import sidereal.universe
 import sidereal.ships as ships
 import sidereal.physics.odeobjects as odeobjects
+import sidereal.navigation as navigation
 
 engine = panda.PandaEngine()
 engine.disableMouse()
@@ -22,7 +23,9 @@ ambientnp = engine.render.attachNewNode(ambient)
 engine.render.setLight(ambientnp)
 
 physicsworld = odeobjects.PhysicsWorld()
+collisionspace = ode.HashSpace()
 shipnodes = []
+geoms = []
 
 for i in range(10):
     if i == 0:
@@ -31,6 +34,8 @@ for i in range(10):
         pos = [random.randint(-100,100) for x in range(3)]
     physics = odeobjects.PhysicsObject(physicsworld,100)
     physics.body.setPosition(tuple(pos))
+    geom = ode.GeomSphere(collisionspace,radius=10.0)
+    geoms.append(geom)
     ship = ships.PhysicsShip(physics)
     shipnode = panda.ShipNode(ship,engine)
     shipnode.debuglight = True
@@ -107,6 +112,36 @@ class ThrusterEngineControl(object):
         print "Right."
         #print self.physicsobject.quaternion
         return task.again
+
+
+class SelectionRay(object):
+    def __init__(self,engine,mainview):
+        self.engine = engine
+        self.mainview = mainview
+        self.engine.accept("mouse1",self.ray)
+    def ray(self):
+        # get camera location
+        location = self.mainview.camera_location
+
+        # and facing
+
+        #USE PANDA?
+
+        
+        # make our geom
+
+        # collide
+
+        # determine what we've hit, if any
+
+        # recentre the camera
+
+    def collision_callback(self,args,geom1,geom2):
+        contacts = ode.collide(geom1,geom2)
+        world,contactgroup = args
+        for c in contacts:
+            pass
+
 
 # code interject
 engine.accept("c",code.interact,['Interpreter: ',raw_input,locals()])
