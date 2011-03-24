@@ -15,7 +15,7 @@ import direct.task
 
 # internal
 
-from sidereal.turtles import triple_floatent=ubuntu&hs=1RC&channel=fs&q=panda3d+selecting+objects&aq=f&aqi=&aql=&oq=
+from sidereal.turtles import triple_float
 
 
 # One thing I'm wondering about, is whether we implement the gui overlay
