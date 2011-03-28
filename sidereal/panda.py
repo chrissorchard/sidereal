@@ -42,9 +42,9 @@ class MainView(object):
         # A camera is its own node. Although we need to attach it to the
         # tree to see anything.
         self.camera_np.reparentTo(self.base.render)
-
+        self.focusmanager = FocusManager()
         self.focuspoint = (0,0,0)
-        self.camera_location = (0,0,0)
+        self.camera_position = (0,0,0)
         self.zoom = 100
         
         # where max, is maximum zoom out
@@ -114,11 +114,11 @@ class MainView(object):
         self.mouse_coords = (x,y) 
 
         #print self.spherepoint
-
-        self.camera_location = self.spherepoint.calculate()
+        offset = self.spherepoint.calculate()
+        self.camera_position = [x+y for x,y in zip(offset,self.focusmanager.coord)]
 
         self.camera_np.setPos(*self.camera_position)
-        self.camera_np.lookAt((0,0,0))
+        self.camera_np.lookAt(self.focusmanager.coord)
 
         return direct.task.Task.again # do the same after delay
     def _randomise_spherepoint(self,task):
@@ -172,25 +172,33 @@ class FocusManager(collections.MutableSet):
     a la CalHomeworld behaviour."""
     def __init__(self):
         self._internal_set = set()
-        self.coord = (0,0,0)
+        self._coord = (0,0,0)
     def add(self,item):
         self._internal_set.add(item)
-        self.coord = self._calculate_average()
+        #self.update()
     def discard(self,item):
         self._internal_set.discard(item)
         # If len is 0, then it'll keep its last average_coord
-        if len(self) > 0:
-            self.coord = self._calculate_average()
+        #if len(self) > 0:
+            #    self.update()
     def __len__(self):
         return len(self._internal_set)
     def __iter__(self):
         return iter(self._internal_set)
     def __contains__(self,item):
         return item in self._internal_set
+    @property
+    def coord(self):
+        if len(self) > 0:
+            self._coord = self._calculate_average()
+        return self._coord
     def _calculate_average(self):
         """Assumes that all objects in the set have a .coord attribute"""
         # AVerageX and so on.
-        avx,avy,avz = 0
+        if len(self) <= 0:
+            return
+
+        avx = avy = avz = 0
         for item in self:
             avx += item.coord[0]
             avy += item.coord[1]

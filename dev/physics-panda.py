@@ -149,6 +149,9 @@ engine.accept("c",code.interact,['Interpreter: ',raw_input,locals()])
 thrustercontrol = ThrusterEngineControl(engine,shipnodes[0].ship.physics)
 engine.taskMgr.doMethodLater(0.01,update_physics,"physics")
 
+# select first objects
+mainview.focusmanager.add(shipnodes[0].ship)
+
 # making it easier to call when running interactively, for testing
 step = engine.taskMgr.step
 while True:
