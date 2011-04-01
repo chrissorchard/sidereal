@@ -15,7 +15,7 @@ if args.fixed_seed:
     random.seed(100)
 
 
-import sidereal.physics.odeobjects as odeobjects
+import sidereal.physics as odeobjects
 import sidereal.turtles as turtles
 
 d = turtles.Display()

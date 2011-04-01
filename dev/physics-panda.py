@@ -10,7 +10,7 @@ import ode
 import sidereal.panda as panda
 import sidereal.universe
 import sidereal.ships as ships
-import sidereal.physics.odeobjects as odeobjects
+import sidereal.physics as odeobjects
 import sidereal.navigation as navigation
 
 engine = panda.PandaEngine()
