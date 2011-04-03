@@ -226,6 +226,7 @@ class ShipNode(object):
         self.ship = ship
         self.nodepath = engine.loader.loadModel(model)
         self.nodepath.reparentTo(engine.render)
+        self.id = hash(self.ship)
 
         self.engine = engine
         self._debuglight = False
@@ -237,7 +238,7 @@ class ShipNode(object):
         if value == True and self._debuglight == False:
             # turn on the light
             light = panda3d.core.PointLight("my light")
-            color = triple_float(hash(self.ship),alpha=True)
+            color = triple_float(hash(self.id),alpha=True)
             light.setColor(color)
             light.setAttenuation((0,0,0.01))
             self.lightnodepath = self.nodepath.attachNewNode(light)
@@ -265,3 +266,22 @@ class ShipNode(object):
         # unpack the coordinates
         self.nodepath.setPos(*coord)
         self.nodepath.setQuat(panda3d.core.Quat(*quaternion))
+
+class Visualrepr(ShipNode):
+    def __init__(self,engine,model="models/teapot",id=0):
+        self.nodepath = engine.loader.loadModel(model)
+        self.nodepath.reparentTo(engine.render)
+        self.engine = engine
+        self._debuglight = False
+        self.id = id
+
+    def get_coord(self):
+        return self.nodepath.getPos()
+    def set_coord(self,coord):
+        self.nodepath.setPos(*coord)
+    coord = property(get_coord,set_coord)
+    def get_quat(self):
+        return self.nodepath.getQuat()
+    def set_quat(self,quat):
+        self.nodepath.setQuat(panda3d.core.Quat(*quat))
+    quaternion = property(get_quat,set_quat)
