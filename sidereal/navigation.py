@@ -12,7 +12,7 @@ def rotate_diff(one,two):
     dest = two.coord
     return perfect_rotation(one.coord,two.coord)
 
-def perfect_rotation(onecoord,twocoord)
+def perfect_rotation(onecoord,twocoord):
     # this is a GOD AWFUL method of doing it
     from panda3d.core import NodePath
     foo = NodePath("foo")
@@ -23,19 +23,17 @@ def perfect_rotation(onecoord,twocoord)
 
     return foo.getQuat()
     
-class FakeNav(object):
+class FakeNav(list):
     """Instead of a magical natural physics basic system, this is our
     cheap hack. Given a target, look in that direction, and suddenly
     start moving at some defined max speed."""
-    def __init__(self,ship):
-        self.ship = ship
-    def navigate(self,waypoints):
-        if len(waypoints) == 0:
+    def navigate(self,physics):
+        if len(self) == 0:
             return
-        target = waypoints[0]
-        rotation = perfect_rotation(self.ship.coord,target)
-        ship.quaternion = rotation
-        ship.velocity = (0,0,50)
+        target = self[0]
+        rotation = perfect_rotation(physics.coord,target)
+        physics.quaternion = rotation
+        physics.velocity = (0,0,50)
 
 
 class CrudeNav(object):
