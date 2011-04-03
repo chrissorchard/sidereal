@@ -51,7 +51,7 @@ class Body(ode.Body):
     avelocity = property(_get_avelocity,_set_avelocity)
 
 
-class PhysicsWorld(ode.World):
+class World(ode.World):
     def __init__(self):
         ode.World.__init__(self)
         self.setGravity((0,0,0))

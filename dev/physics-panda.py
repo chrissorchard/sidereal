@@ -22,7 +22,7 @@ ambient.setColor((0.1,0.1,0.1,0.1))
 ambientnp = engine.render.attachNewNode(ambient)
 engine.render.setLight(ambientnp)
 
-physicsworld = odeobjects.PhysicsWorld()
+physicsworld = odeobjects.World()
 collisionspace = ode.HashSpace()
 shipnodes = []
 geoms = []
