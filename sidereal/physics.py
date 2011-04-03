@@ -21,10 +21,18 @@ class Body(ode.Body):
     """A wrapper for the ode.Body() object that has a bunch of properties."""
     def __init__(self,world,mass=1.0):
         ode.Body.__init__(self,world)
-        self.mass = ode.Mass()
-        self.mass.setSphere(2500.0, 0.05)
-        self.mass.mass = mass
-        self.setMass(self.mass)
+        self._mass = ode.Mass()
+        self._mass.setSphere(2500.0, 0.05)
+        self._mass.mass = mass
+        self.setMass(self._mass)
+    def _get_mass(self):
+        return self._mass.mass
+    def _set_mass(self,mass_value):
+        mass = self.getMass()
+        mass.mass = mass_value
+        self._mass = mass
+        self.setMass(mass)
+    mass = property(_get_mass,_set_mass)
 
     def _get_coord(self):
         return self.getPosition()
@@ -42,6 +50,7 @@ class Body(ode.Body):
         return self.getLinearVel()
     def _set_velocity(self,velocity):
         self.setLinearVel(velocity)
+
     velocity = property(_get_velocity,_set_velocity)
 
     def _get_avelocity(self):
