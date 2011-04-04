@@ -67,6 +67,8 @@ class Ship(object):
 
     def __hash__(self):
         return hash(self.id)
+    def __repr__(self):
+        return "<Ship (id={})>".format(self.id)
 
 class PhysicsShip(Ship):
     def __init__(self,physics,myuniverse=None):

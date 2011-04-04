@@ -276,12 +276,12 @@ class Visualrepr(ShipNode):
         self.id = id
 
     def get_coord(self):
-        return self.nodepath.getPos()
+        return tuple(self.nodepath.getPos())
     def set_coord(self,coord):
         self.nodepath.setPos(*coord)
     coord = property(get_coord,set_coord)
     def get_quat(self):
-        return self.nodepath.getQuat()
+        return tuple(self.nodepath.getQuat())
     def set_quat(self,quat):
         self.nodepath.setQuat(panda3d.core.Quat(*quat))
     quaternion = property(get_quat,set_quat)
