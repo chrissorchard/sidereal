@@ -44,7 +44,7 @@ for i in range(10):
     else:
         pos = [r.randint(-100,100) for x in range(3)]
     
-    gameloop.gasau_physics[gasau].mass = 1000
+    gameloop.gasau_physics[gasau].mass = 100
     gameloop.gasau_physics[gasau].coord = pos
     shipnode = panda.Visualrepr(engine,id=hash(gasau))
 
@@ -87,19 +87,19 @@ class ThrusterEngineControl(object):
                 self.engine.taskMgr.remove('righttask')
 
     def forward(self,task):
-        self.physicsobject.addRelForce((100,0,0))
+        self.physicsobject.body.addRelForce((100,0,0))
         #print "Forward."
         return task.again
 
     def left(self,task):
-        self.physicsobject.addRelTorque((0,0,0.5))
-        print "Left."
+        self.physicsobject.body.addRelTorque((0,0,0.5))
+        #print "Left."
         #print self.physicsobject.quaternion
         return task.again
 
     def right(self,task):
-        self.physicsobject.addRelTorque((-0,-0,-0.5))
-        print "Right."
+        self.physicsobject.body.addRelTorque((-0,-0,-0.5))
+        #print "Right."
         #print self.physicsobject.quaternion
         return task.again
 
