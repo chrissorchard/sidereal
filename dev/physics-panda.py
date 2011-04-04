@@ -12,6 +12,7 @@ import sidereal.universe
 import sidereal.ships as ships
 import sidereal.physics as odeobjects
 import sidereal.navigation as navigation
+import sidereal.game
 
 engine = panda.PandaEngine()
 engine.disableMouse()
@@ -22,48 +23,37 @@ ambient.setColor((0.1,0.1,0.1,0.1))
 ambientnp = engine.render.attachNewNode(ambient)
 engine.render.setLight(ambientnp)
 
-physicsworld = odeobjects.World()
-collisionspace = ode.HashSpace()
-shipnodes = []
-geoms = []
+
+gameloop = sidereal.game.Gameloop(do_graphics=False)
+first = None
+
+# little wrapper for panda
+def gameloop_tick_task(task):
+    global gameloop
+    gameloop.tick()
+    return task.again
 
 for i in range(10):
+    gasau = gameloop.new_gasau()
+    r = random.Random()
+    r.seed(hash(gasau))
+
     if i == 0:
+        first = gasau
         pos = (0,0,0)
     else:
-        pos = [random.randint(-100,100) for x in range(3)]
-    physics = odeobjects.PhysicsObject(physicsworld,100)
-    physics.body.setPosition(tuple(pos))
-    geom = ode.GeomSphere(collisionspace,radius=10.0)
-    geoms.append(geom)
-    ship = ships.PhysicsShip(physics)
-    shipnode = panda.ShipNode(ship,engine)
+        pos = [r.randint(-100,100) for x in range(3)]
+    
+    gameloop.gasau_physics[gasau].mass = 1000
+    gameloop.gasau_physics[gasau].coord = pos
+    shipnode = panda.Visualrepr(engine,id=hash(gasau))
+
     shipnode.debuglight = True
-    shipnodes.append(shipnode)
+    gameloop.gasau_visualrepr[gasau] = shipnode
 
 mainview = sidereal.panda.MainView(base)
 for region in engine.win.getDisplayRegions():
     region.setCamera(mainview.camera_np)
-
-def anglexyz(q):
-    q1,q2,q3,q4 = q
-    halftheta = math.acos(q4)
-    x = q1 / math.sin(halftheta)
-    y = q2 / math.sin(halftheta)
-    z = q3 / math.sin(halftheta)
-    print "%.2f %.2f %.2f %.2f" % (x,y,z,math.degrees(halftheta*2))
-
-def update_physics(task):
-    for shipnode in shipnodes:
-        if shipnode is shipnodes[0]:
-            #w,x,y,z = shipnode.ship.quaternion
-            #W,X,Y,Z = math.asin(w),math.asin(x),math.asin(y),math.asin(z)
-            #print math.degrees(W),math.degrees(X),math.degrees(Y),math.degrees(Z)
-            anglexyz(shipnode.ship.quaternion)
-
-        shipnode.physics_update()
-    physicsworld.step(0.01)
-    return task.again
 
 class ThrusterEngineControl(object):
     def __init__(self,engine,physicsobject):
@@ -97,18 +87,18 @@ class ThrusterEngineControl(object):
                 self.engine.taskMgr.remove('righttask')
 
     def forward(self,task):
-        self.physicsobject.body.addRelForce((100,0,0))
+        self.physicsobject.addRelForce((100,0,0))
         #print "Forward."
         return task.again
 
     def left(self,task):
-        self.physicsobject.body.addRelTorque((0,0,0.5))
+        self.physicsobject.addRelTorque((0,0,0.5))
         print "Left."
         #print self.physicsobject.quaternion
         return task.again
 
     def right(self,task):
-        self.physicsobject.body.addRelTorque((-0,-0,-0.5))
+        self.physicsobject.addRelTorque((-0,-0,-0.5))
         print "Right."
         #print self.physicsobject.quaternion
         return task.again
@@ -146,11 +136,12 @@ class SelectionRay(object):
 # code interject
 engine.accept("c",code.interact,['Interpreter: ',raw_input,locals()])
 
-thrustercontrol = ThrusterEngineControl(engine,shipnodes[0].ship.physics)
-engine.taskMgr.doMethodLater(0.01,update_physics,"physics")
+thrustercontrol = ThrusterEngineControl(engine,gameloop.gasau_physics[first])
+
+engine.taskMgr.doMethodLater(0.01,gameloop_tick_task,"gameloop")
 
 # select first objects
-mainview.focusmanager.add(shipnodes[0].ship)
+mainview.focusmanager.add(gameloop.gasau_physics[first])
 
 # making it easier to call when running interactively, for testing
 step = engine.taskMgr.step
