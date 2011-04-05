@@ -8,6 +8,8 @@ Need to get to a specific location? This is the thang.
 import math
 import collections
 
+import sidereal.vector as vector
+
 # utility functions
 def rotate_diff(one,two):
     coord = one.coord
@@ -41,10 +43,14 @@ class FakeNav(collections.deque):
         if self.target is None:
             return
         # not actually working
-        rotation = perfect_rotation(self.target,physics.coord)
-        physics.quaternion = rotation
+        #rotation = perfect_rotation(self.target,physics.coord)
+        velocity = vector.v(physics.velocity)
+        #physics.quaternion = rotation
+        v = vector.Vector(self.target) - vector.Vector(physics.coord)
 
-        # ugh, velocity
+        if velocity.length < 1000:
+            physics.body.addForce(v.normalised()*1000)
+
 
         # check to see if we're "here"
         #print physics.coord
@@ -52,6 +58,7 @@ class FakeNav(collections.deque):
         d = distance(physics.coord,self.target)
         if d < 5:
             self.popleft()
+            physics.velocity = (0,0,0)
 
     @property
     def target(self):
