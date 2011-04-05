@@ -66,7 +66,7 @@ def cached(func):
 
 
 class Vector(tuple):
-    """Two-dimensional float vector implementation.
+    """Three-dimensional float vector implementation.
 
     """
 
@@ -74,13 +74,13 @@ class Vector(tuple):
         """Construct a concise string representation.
 
         """
-        return "Vector((%.2f, %.2f))" % self
+        return "Vector((%.2f, %.2f, %.2f))" % self
 
     def __repr__(self):
         """Construct a precise string representation.
 
         """
-        return "Vector((%r, %r))" % self
+        return "Vector((%r, %r, %r))" % self
 
     @property
     def x(self):
@@ -96,6 +96,13 @@ class Vector(tuple):
         """
         return self[1]
 
+    @property
+    def z(self):
+        """The depth coordinate.
+
+        """
+        return self[2]
+
     @cached
     def length(self):
         """The length of the vector.
@@ -108,9 +115,10 @@ class Vector(tuple):
         """The square of the length of the vector.
 
         """
-        vx, vy = self
-        return vx ** 2 + vy ** 2
-
+        vx, vy, vz = self
+        return vx ** 2 + vy ** 2 + vz ** 2
+    
+    # TODO Does this make sense in 3D
     @cached
     def angle(self):
         """The angle the vector makes to the positive x axis in the range
@@ -125,7 +133,7 @@ class Vector(tuple):
         """Flag indicating whether this is the zero vector.
 
         """
-        return self[0] == 0.0 and self[1] == 0.0
+        return self[0] == 0.0 and self[1] == 0.0 and self[2] == 0.0
 
     def __add__(self, other):
         """Add the vectors componentwise.
@@ -135,7 +143,7 @@ class Vector(tuple):
                 The object to add.
 
         """
-        return Vector((self[0] + other[0], self[1] + other[1]))
+        return Vector((self[0] + other[0], self[1] + other[1], self[2] + other[2]))
 
     def __radd__(self, other):
         """Add the vectors componentwise.
@@ -145,7 +153,7 @@ class Vector(tuple):
                 The object to add.
 
         """
-        return Vector((other[0] + self[0], other[1] + self[1]))
+        return Vector((other[0] + self[0], other[1] + self[1], other[2] + self[2]))
 
     def __sub__(self, other):
         """Subtract the vectors componentwise.
@@ -155,7 +163,7 @@ class Vector(tuple):
                 The object to subtract.
 
         """
-        return Vector((self[0] - other[0], self[1] - other[1]))
+        return Vector((self[0] - other[0], self[1] - other[1], self[2] - other[2]))
 
     def __rsub__(self, other):
         """Subtract the vectors componentwise.
@@ -165,7 +173,7 @@ class Vector(tuple):
                 The object to subtract.
 
         """
-        return Vector((other[0] - self[0], other[1] - self[1]))
+        return Vector((other[0] - self[0], other[1] - self[1], other[2] - self[2]))
 
     def __mul__(self, other):
         """Either multiply the vector by a scalar or compute the dot product
@@ -178,9 +186,9 @@ class Vector(tuple):
         """
         try:
             other = float(other)
-            return Vector((self[0] * other, self[1] * other))
+            return Vector((self[0] * other, self[1] * other, self[2] * other))
         except TypeError:
-            return self[0] * other[0] + self[1] * other[1]
+            return self[0] * other[0] + self[1] * other[1] + self[2] * other[2]
 
     def __rmul__(self, other):
         """Either multiply the vector by a scalar or compute the dot product
@@ -193,9 +201,9 @@ class Vector(tuple):
         """
         try:
             other = float(other)
-            return Vector((other * self[0], other * self[1]))
+            return Vector((other * self[0], other * self[1], other * self[2]))
         except TypeError:
-            return other[0] * self[0] + other[1] * self[1]
+            return other[0] * self[0] + other[1] * self[1] + other[2] * self[2]
 
     def __div__(self, other):
         """Divide the vector by a scalar.
@@ -205,7 +213,7 @@ class Vector(tuple):
                 The object by which to divide.
 
         """
-        return Vector((self[0] / other, self[1] / other))
+        return Vector((self[0] / other, self[1] / other, self[2] / other))
 
     def __truediv__(self, other):
         """Divide the vector by a scalar.
@@ -215,7 +223,7 @@ class Vector(tuple):
                 The object by which to divide.
 
         """
-        return Vector((self[0] / other, self[1] / other))
+        return Vector((self[0] / other, self[1] / other, self[2] / other))
 
     def __floordiv__(self, other):
         """Divide the vector by a scalar, rounding down.
@@ -225,14 +233,15 @@ class Vector(tuple):
                 The object by which to divide.
 
         """
-        return Vector((self[0] // other, self[1] // other))
+        return Vector((self[0] // other, self[1] // other, self[2] // other))
 
     def __neg__(self):
         """Compute the unary negation of the vector.
 
         """
-        return Vector((-self[0], -self[1]))
+        return Vector((-self[0], -self[1], -self[2]))
 
+    # TODO vector.Vector.rotated
     def rotated(self, angle):
         """Compute the vector rotated by an angle.
 
@@ -254,9 +263,9 @@ class Vector(tuple):
                 The length to which to scale.
 
         """
-        vx, vy = self
+        vx, vy, vz = self
         s = length / self.length
-        v = Vector((vx * s, vy * s))
+        v = Vector((vx * s, vy * s, vz * s))
         v.length = length
         return v
 
@@ -277,9 +286,9 @@ class Vector(tuple):
         """Compute the vector scaled to unit length.
 
         """
-        vx, vy = self
+        vx, vy, vz = self
         l = self.length
-        v = Vector((vx / l, vy / l))
+        v = Vector((vx / l, vy / l, vz / l))
         v.length = 1.0
         return v
 
@@ -291,7 +300,8 @@ class Vector(tuple):
         if self.is_zero:
             return self
         return self.normalised()
-
+    
+    # TODO vector.Vector.perpendicular
     def perpendicular(self):
         """Compute the perpendicular.
 
@@ -307,7 +317,7 @@ class Vector(tuple):
                 The vector with which to compute the dot product.
 
         """
-        return self[0] * other[0] + self[1] * other[1]
+        return self[0] * other[0] + self[1] * other[1] + self[2] * other[2]
 
     def cross(self, other):
         """Compute the cross product with another vector.
@@ -329,6 +339,7 @@ class Vector(tuple):
         """
         return self * self.dot(other) / self.dot(self)
 
+    # TODO Depends on Vector.angle
     def angle_to(self, other):
         """Compute the angle made to another vector in the range [0, 180].
 
@@ -342,6 +353,7 @@ class Vector(tuple):
         a = abs(other.angle - self.angle)
         return min(a, 360 - a)
 
+    # TODO Depends on Vector.angle
     def signed_angle_to(self, other):
         """Compute the signed angle made to another vector in the range
         (-180, 180].
@@ -811,16 +823,16 @@ def v(*args):
 
 
 #: The zero vector.
-zero = Vector((0, 0))
+zero = Vector((0, 0, 0))
 
 #: The unit vector on the x-axis.
-unit_x = Vector((1, 0))
+#unit_x = Vector((1, 0))
 
 #: The unit vector on the y-axis.
-unit_y = Vector((0, 1))
+#unit_y = Vector((0, 1))
 
 #: The x-axis line.
-x_axis = Line(unit_y, 0.0)
+#x_axis = Line(unit_y, 0.0)
 
 #: The y-axis line.
-y_axis = Line(-unit_x, 0.0)
+#y_axis = Line(-unit_x, 0.0)
