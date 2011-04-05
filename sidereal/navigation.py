@@ -5,6 +5,9 @@ Need to get to a specific location? This is the thang.
 
 """
 
+import math
+import collections
+
 # utility functions
 def rotate_diff(one,two):
     coord = one.coord
@@ -22,18 +25,40 @@ def perfect_rotation(onecoord,twocoord):
     foo.lookAt(bar)
 
     return foo.getQuat()
-    
-class FakeNav(list):
+
+def distance(one,two):
+    # for (x1,y1,z1) and (x2,y2,z2)
+    total = [(j - i)**2 for i,j in zip(one,two)]
+    # [ (x2 - x1)^2 etc. ]
+    return math.sqrt(sum(total))
+
+class FakeNav(collections.deque):
     """Instead of a magical natural physics basic system, this is our
     cheap hack. Given a target, look in that direction, and suddenly
     start moving at some defined max speed."""
     def navigate(self,physics):
-        if len(self) == 0:
+        # check to see if we have no waypoints
+        if self.target is None:
             return
-        target = self[0]
-        rotation = perfect_rotation(physics.coord,target)
+        # not actually working
+        rotation = perfect_rotation(self.target,physics.coord)
         physics.quaternion = rotation
-        physics.velocity = (0,0,50)
+
+        # ugh, velocity
+
+        # check to see if we're "here"
+        #print physics.coord
+        #print self.target
+        d = distance(physics.coord,self.target)
+        if d < 5:
+            self.popleft()
+
+    @property
+    def target(self):
+        if len(self) == 0:
+            return None
+        else:
+            return self[0]
 
 
 class CrudeNav(object):

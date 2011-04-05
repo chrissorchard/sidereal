@@ -43,7 +43,8 @@ for i in range(10):
         pos = (0,0,0)
     else:
         pos = [r.randint(-100,100) for x in range(3)]
-    
+        gameloop.gasau_navigation[first].append(tuple(pos))
+ 
     gameloop.gasau_physics[gasau].mass = 100
     gameloop.gasau_physics[gasau].coord = pos
     shipnode = panda.Visualrepr(engine,id=hash(gasau))
