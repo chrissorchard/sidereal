@@ -7,6 +7,7 @@ TODO this doc is clearly incomplete."""
 import collections
 import random
 import math
+import threading
 
 # third party
 import panda3d.core
@@ -59,12 +60,20 @@ class MainView(object):
         self.spherepoint = SpherePoint(self.zoom,0,0.5)
 
         self.set_up_event_handlers()
+        
+        # always follow camera
+        self.base.taskMgr.add(self._pandatask_update_camera,'cameraupdate')
 
     def set_up_event_handlers(self):
+        self.mouse_lock = threading.Lock()
+        self.mouse_rotate = False
+        self.base.accept('mouse1',self.watch_mouse)
+        self.base.accept('mouse1-up',self.stop_watching_mouse)
         self.base.accept('mouse3',self.watch_mouse)
         self.base.accept('mouse3-up',self.stop_watching_mouse)
         self.base.accept('wheel_up',self.adjust_zoom,[-10])
         self.base.accept('wheel_down',self.adjust_zoom,[10])
+
 
         #self.base.taskMgr.doMethodLater(0.5,self._randomise_spherepoint,'randomise')
     def adjust_zoom(self,adjustment):
@@ -75,10 +84,16 @@ class MainView(object):
         self.spherepoint.radius = self.zoom
 
     def watch_mouse(self):
-        self.mouse_coords = ()
-        self.base.taskMgr.doMethodLater(0.01,self.mouse_monitor_task, 'main-view mouse watch')
+        with self.mouse_lock:
+            if self.mouse_rotate == False:
+                self.mouse_coords = ()
+                self.base.taskMgr.doMethodLater(0.01,self.mouse_monitor_task, 'main-view mouse watch')
+                self.mouse_rotate = True
     def stop_watching_mouse(self):
-        self.base.taskMgr.remove('main-view mouse watch')
+        with self.mouse_lock:
+            if self.mouse_rotate == True:
+                self.base.taskMgr.remove('main-view mouse watch')
+                self.mouse_rotate = False
 
     def mouse_monitor_task(self,task):
         x = self.base.mouseWatcherNode.getMouseX()
@@ -89,7 +104,7 @@ class MainView(object):
         # If the coords are empty, then skip this whole block
         if self.mouse_coords is ():
             self.mouse_coords = (x,y)
-            return direct.task.Task.cont # do the same next frame
+            return task.cont # do the same next frame
 
         dx = self.mouse_coords[0] - x
         dy = self.mouse_coords[1] - y
@@ -111,22 +126,23 @@ class MainView(object):
         vertical = max(vertical,0.000001)
         self.spherepoint.vertical = vertical
             
-        self.mouse_coords = (x,y) 
+        return task.cont
 
-        #print self.spherepoint
+    def _update_camera(self):
         offset = self.spherepoint.calculate()
         self.camera_position = [x+y for x,y in zip(offset,self.focusmanager.coord)]
-
         self.camera_np.setPos(*self.camera_position)
         self.camera_np.lookAt(self.focusmanager.coord)
+    def _pandatask_update_camera(self,task):
+        self._update_camera()
+        return task.cont
 
-        return direct.task.Task.again # do the same after delay
     def _randomise_spherepoint(self,task):
         self.spherepoint.vertical = random.random()
         self.spherepoint.angle = random.random() * math.pi * 2
         self.camera_np.setPos(*self.spherepoint.calculate())
         self.camera_np.lookAt((0,0,0))
-        return direct.task.Task.again
+        return task.again
 
 class SpherePoint(object):
     """Manipulating a camera on a sphere's surface seems complicated.
@@ -285,3 +301,4 @@ class Visualrepr(ShipNode):
     def set_quat(self,quat):
         self.nodepath.setQuat(panda3d.core.Quat(*quat))
     quaternion = property(get_quat,set_quat)
+
