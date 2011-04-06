@@ -327,7 +327,10 @@ class Vector(tuple):
                 The vector with which to compute the cross product.
 
         """
-        return self[0] * other[1] - self[1] * other[0]
+        i = (self[1]*other[2]) - (self[2]*self[1])
+        j = (self[2]*other[0]) - (self[0]*self[2])
+        k = (self[0]*other[1]) - (self[1]*self[0])
+        return Vector((i,j,k))
 
     def project(self, other):
         """Compute the projection of another vector onto this one.
