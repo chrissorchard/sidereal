@@ -381,6 +381,13 @@ class Vector(tuple):
         """
         return (other - self).length
 
+    def rotate_around_axis(self, axis_orig, angle):
+        axis = Vector(axis_orig)
+        v1 = self * math.cos(angle)
+        v2 = (axis.cross(self)) * math.sin(angle)
+        v3 = axis * (axis.dot(self)) * (1 - math.cos(angle))
+        return v1 + v2 + v3
+
 
 class Line(object):
     """Two-dimensional vector (directed) line implementation.
