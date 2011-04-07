@@ -51,7 +51,7 @@ class Quaternion(tuple):
             return Quaternion((q1,q2,q3,q4))
 
     def conjugate(self):
-        return self + q_i*self*q_i + q_j*self*q_j + q_k*self*q_k * -0.5
+        return Quaternion((self[0],-self[1],-self[2],-self[3]))
 
 def q(*args):
     """Construct a quaternion from an iterable or from multiple arguments.
