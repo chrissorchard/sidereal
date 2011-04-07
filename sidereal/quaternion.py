@@ -79,6 +79,12 @@ class Quaternion(tuple):
 
         return Quaternion((a1+a2,b1+b2,c1+c2,d1+d2))
 
+    def __sub__(self,other):
+        a1,b1,c1,d1 = self
+        a2,b2,c2,d2 = other
+
+        return Quaternion((a1-a2,b1-b2,c1-c2,d1-d2))
+
     def __mul__(self,other):
         try:
             other = float(other)
@@ -97,8 +103,8 @@ class Quaternion(tuple):
     def conjugate(self):
         return Quaternion((self[0],-self[1],-self[2],-self[3]))
 
-    @staticmethod
-    def from_axisangle(self,axis,angle):
+    @classmethod
+    def from_axisangle(cls,axis,angle):
         halfangle = angle / 2
         x,y,z = axis
         q1 = x * math.sin(halfangle)
@@ -106,6 +112,21 @@ class Quaternion(tuple):
         q3 = z * math.sin(halfangle)
         q4 = math.cos(halfangle)
         return Quaternion((q1,q2,q3,q4))
+
+    @classmethod
+    def from_euler(cls,angles):
+        pitch,yaw,roll = angles
+        # or x,y,z
+        # or pitcx,yaw,rolz
+        i = (1,0,0)
+        j = (0,1,0)
+        k = (0,0,1)
+
+        iq = cls.from_axisangle(i,pitch)
+        jq = cls.from_axisangle(j,yaw)
+        kq = cls.from_axisangle(k,roll)
+
+        return iq * jq * kq
 
 def q(*args):
     """Construct a quaternion from an iterable or from multiple arguments.
