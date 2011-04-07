@@ -1,5 +1,40 @@
 """Who loves quaternions!?"""
 
+from __future__ import division
+
+import math
+
+# This is from sidereal.vector
+# I would import it, but that would mean this class no longer stands alone.
+def cached(func):
+    """Decorate a function as a caching property.
+
+    :Parameters:
+        `func` : function
+            The getter function to decorate.
+
+    """
+    cached_name = "_cached_%s" % func.func_name
+
+    # The keywords 'getattr' and 'cached_name' are used to optimise the common
+    # case (return cached value) by bringing the used names to local scope.
+    def fget(self, getattr=getattr, cached_name=cached_name):
+        try:
+            return getattr(self, cached_name)
+        except AttributeError:
+            value = func(self)
+            setattr(self, cached_name, value)
+            return value
+
+    def fset(self, value):
+        assert not hasattr(self, cached_name)
+        setattr(self, cached_name, value)
+
+    fget.func_name = "get_" + func.func_name
+    fset.func_name = "set_" + func.func_name
+
+    return property(fget, fset, doc=func.func_doc)
+
 class Quaternion(tuple):
     def __str__(self):
         """Construct a concise string representation.
@@ -28,6 +63,15 @@ class Quaternion(tuple):
     @property
     def w(self):
         return self[3]
+
+    @cached
+    def norm(self):
+        return math.sqrt(self[0]**2 + self[1]**2 + self[2]**2 + self[3]**2)
+
+    def versor(self):
+        qx,qy,qz,qw = self
+        n = self.norm
+        return Quaternion((qx / n, qy / n, qz / n, qw / n))
 
     def __add__(self,other):
         a1,b1,c1,d1 = self
