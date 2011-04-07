@@ -102,12 +102,18 @@ class MainView(object):
         #print x,y
 
         # If the coords are empty, then skip this whole block
-        if self.mouse_coords is ():
+        if self.mouse_coords == ():
             self.mouse_coords = (x,y)
             return task.cont # do the same next frame
 
+        if self.mouse_coords == (x,y):
+            return task.again
+
+
         dx = self.mouse_coords[0] - x
         dy = self.mouse_coords[1] - y
+
+        self.mouse_coords = (x,y)
 
         #print dx,dy
 
@@ -126,7 +132,7 @@ class MainView(object):
         vertical = max(vertical,0.000001)
         self.spherepoint.vertical = vertical
             
-        return task.cont
+        return task.again
 
     def _update_camera(self):
         offset = self.spherepoint.calculate()

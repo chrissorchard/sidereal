@@ -41,6 +41,7 @@ for i in range(10):
     if i == 0:
         first = gasau
         pos = (0,0,0)
+        gameloop.gasau_navigation[first] = navigation.StraightAhead()
     else:
         pos = [r.randint(-100,100) for x in range(3)]
         gameloop.gasau_navigation[first].append(tuple(pos))

@@ -4,6 +4,7 @@ Navigation internal AI.
 Need to get to a specific location? This is the thang.
 
 """
+from __future__ import division
 
 import math
 import collections
@@ -46,6 +47,25 @@ def anglexyz(q):
     return x,y,z,halftheta*2
 #print "%.2f %.2f %.2f %.2f" % (x,y,z,math.degrees(halftheta*2))
 
+def axisangle_to_quat(axis,angle):
+    halfangle = angle / 2
+    x,y,z = axis
+    q1 = x * math.sin(halfangle)
+    q2 = y * math.sin(halfangle)
+    q3 = z * math.sin(halfangle)
+    q4 = math.cos(halfangle)
+    return q1,q2,q3,q4
+
+
+class StraightAhead(collections.deque):
+    def navigate(self,physics):
+        base = vector.v(1,0,-1).safe_normalised()
+        direction = vector.v(0,0,5)
+
+        axis,angle = direction.map(base)
+        q = axisangle_to_quat(axis,angle)
+        physics.quaternion = q
+        physics.velocity = direction
 
 class FakeNav(collections.deque):
     """Instead of a magical natural physics basic system, this is our
@@ -60,7 +80,7 @@ class FakeNav(collections.deque):
         velocity = vector.v(physics.velocity)
         #physics.quaternion = rotation
         v = vector.Vector(self.target) - vector.Vector(physics.coord)
-
+ 
         if velocity.length < 1000:
             physics.body.addForce(v.normalised()*1000)
 
