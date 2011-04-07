@@ -10,6 +10,7 @@ import math
 import collections
 
 import sidereal.vector as vector
+from sidereal.quaternion import Quaternion
 
 # utility functions
 def rotate_diff(one,two):
@@ -47,15 +48,7 @@ def anglexyz(q):
     return x,y,z,halftheta*2
 #print "%.2f %.2f %.2f %.2f" % (x,y,z,math.degrees(halftheta*2))
 
-def axisangle_to_quat(axis,angle):
-    halfangle = angle / 2
-    x,y,z = axis
-    q1 = x * math.sin(halfangle)
-    q2 = y * math.sin(halfangle)
-    q3 = z * math.sin(halfangle)
-    q4 = math.cos(halfangle)
-    return q1,q2,q3,q4
-
+axisangle_to_quat = Quaternion.from_axisangle
 
 class StraightAhead(collections.deque):
     def navigate(self,physics):

@@ -97,6 +97,16 @@ class Quaternion(tuple):
     def conjugate(self):
         return Quaternion((self[0],-self[1],-self[2],-self[3]))
 
+    @staticmethod
+    def from_axisangle(self,axis,angle):
+        halfangle = angle / 2
+        x,y,z = axis
+        q1 = x * math.sin(halfangle)
+        q2 = y * math.sin(halfangle)
+        q3 = z * math.sin(halfangle)
+        q4 = math.cos(halfangle)
+        return Quaternion((q1,q2,q3,q4))
+
 def q(*args):
     """Construct a quaternion from an iterable or from multiple arguments.
 
