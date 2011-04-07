@@ -388,6 +388,12 @@ class Vector(tuple):
         v3 = axis * (axis.dot(self)) * (1 - math.cos(angle))
         return v1 + v2 + v3
 
+    def map(self, other):
+        """Returns axis, and angle"""
+
+        axis = self.cross(other)
+        angle = math.acos(self.dot(other))
+        return axis, angle
 
 class Line(object):
     """Two-dimensional vector (directed) line implementation.
