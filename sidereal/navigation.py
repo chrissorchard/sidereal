@@ -10,7 +10,7 @@ import math
 import collections
 
 import sidereal.vector as vector
-from sidereal.quaternion import Quaternion
+from sidereal.quaternion import Quaternion,q
 
 # utility functions
 def rotate_diff(one,two):
@@ -48,17 +48,11 @@ def anglexyz(q):
     return x,y,z,halftheta*2
 #print "%.2f %.2f %.2f %.2f" % (x,y,z,math.degrees(halftheta*2))
 
-axisangle_to_quat = Quaternion.from_axisangle
 
 class StraightAhead(collections.deque):
     def navigate(self,physics):
-        base = vector.v(1,0,-1).safe_normalised()
-        direction = vector.v(0,0,5)
-
-        axis,angle = direction.map(base)
-        q = axisangle_to_quat(axis,angle)
-        physics.quaternion = q
-        physics.velocity = direction
+        physics.quaternion = Quaternion.from_euler((math.pi,0,0))
+        physics.velocity = (10,0,0)
 
 class FakeNav(collections.deque):
     """Instead of a magical natural physics basic system, this is our
