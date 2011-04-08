@@ -2,6 +2,8 @@ import ode
 import collections
 import math
 
+from sidereal.vector import Vector
+
 class PhysicsObject(object):
     def __init__(self,world,mass=1.0):
         self.body = ode.Body(world)
@@ -57,6 +59,16 @@ class Body(object):
         self.body.setAngularVel(avelocity)
     avelocity = property(_get_avelocity,_set_avelocity)
 
+
+def vector_orientation(physics):
+    tempworld = World()
+    tempbody = Body(tempworld)
+    # mass of 1
+    tempbody.coord = (0,0,0)
+    tempbody.quaternion = physics.quaternion
+    tempbody.body.addRelForce((1,0,0))
+    tempworld.step(1)
+    return Vector(tempbody.coord)
 
 class World(ode.World):
     def __init__(self):

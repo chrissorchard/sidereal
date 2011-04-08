@@ -11,6 +11,7 @@ import collections
 
 import sidereal.vector as vector
 from sidereal.quaternion import Quaternion,q
+import sidereal.physics
 
 # utility functions
 def rotate_diff(one,two):
@@ -36,8 +37,10 @@ def distance(one,two):
     # [ (x2 - x1)^2 etc. ]
     return math.sqrt(sum(total))
 
-def unit_vector_to_quaternion(unitv):
-    unitv = vector.Vector(unitv).safe_normalised()
+class Monitor(collections.deque):
+    def navigate(self,physics):
+        print sidereal.physics.vector_orientation(physics)
+
 
 class StraightAhead(collections.deque):
     def navigate(self,physics):

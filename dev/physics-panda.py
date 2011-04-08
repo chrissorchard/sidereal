@@ -41,7 +41,8 @@ for i in range(10):
     if i == 0:
         first = gasau
         pos = (0,0,0)
-        gameloop.gasau_navigation[first] = navigation.StraightAhead()
+        #gameloop.gasau_navigation[first] = navigation.StraightAhead()
+        gameloop.gasau_navigation[first] = navigation.Monitor()
     else:
         pos = [r.randint(-100,100) for x in range(3)]
         gameloop.gasau_navigation[first].append(tuple(pos))
@@ -61,15 +62,19 @@ class ThrusterEngineControl(object):
     def __init__(self,engine,physicsobject):
         self.physicsobject = physicsobject
         self.engine = engine
-        self.engine.accept("arrow_up",self.task_modify,['up',True])
-        self.engine.accept("arrow_up-up",self.task_modify,['up',False])
+        self.engine.accept("arrow_up",self.task_modify,['forward',True])
+        self.engine.accept("arrow_up-up",self.task_modify,['forward',False])
         self.engine.accept("arrow_left",self.task_modify,['left',True])
         self.engine.accept("arrow_left-up",self.task_modify,['left',False])
         self.engine.accept("arrow_right",self.task_modify,['right',True])
         self.engine.accept("arrow_right-up",self.task_modify,['right',False])
+        self.engine.accept("w",self.task_modify,['up',True])
+        self.engine.accept("w-up",self.task_modify,['up',False])
+        self.engine.accept("s",self.task_modify,['down',True])
+        self.engine.accept("s-up",self.task_modify,['down',False])
 
     def task_modify(self,task,state):
-        if task == "up":
+        if task == "forward":
             if state:
                 self.engine.taskMgr.doMethodLater(0.01,self.forward,
                                                   'forwardtask')
@@ -87,6 +92,18 @@ class ThrusterEngineControl(object):
                                                   'righttask')
             else:
                 self.engine.taskMgr.remove('righttask')
+        elif task == "up":
+            if state:
+                self.engine.taskMgr.doMethodLater(0.01,self.up,
+                                                  'uptask')
+            else:
+                self.engine.taskMgr.remove('uptask')
+        elif task == "down":
+            if state:
+                self.engine.taskMgr.doMethodLater(0.01,self.down,
+                                                  'downtask')
+            else:
+                self.engine.taskMgr.remove('downtask')
 
     def forward(self,task):
         self.physicsobject.body.addRelForce((100,0,0))
@@ -103,6 +120,13 @@ class ThrusterEngineControl(object):
         self.physicsobject.body.addRelTorque((-0,-0,-0.5))
         #print "Right."
         #print self.physicsobject.quaternion
+        return task.again
+
+    def up(self,task):
+        self.physicsobject.body.addRelTorque((0,0.5,0))
+        return task.again
+    def down(self,task):
+        self.physicsobject.body.addRelTorque((0,-0.5,0))
         return task.again
 
 
