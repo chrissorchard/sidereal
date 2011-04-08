@@ -68,6 +68,16 @@ class Quaternion(tuple):
     def norm(self):
         return math.sqrt(self[0]**2 + self[1]**2 + self[2]**2 + self[3]**2)
 
+    @cached
+    def axisangle(self):
+        q1,q2,q3,q4 = self
+        halftheta = math.acos(q4)
+        x = q1 / math.sin(halftheta)
+        y = q2 / math.sin(halftheta)
+        z = q3 / math.sin(halftheta)
+        return (x,y,z),halftheta*2
+
+
     def versor(self):
         qx,qy,qz,qw = self
         n = self.norm

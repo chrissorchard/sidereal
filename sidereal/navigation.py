@@ -39,16 +39,6 @@ def distance(one,two):
 def unit_vector_to_quaternion(unitv):
     unitv = vector.Vector(unitv).safe_normalised()
 
-def anglexyz(q):
-    q1,q2,q3,q4 = q
-    halftheta = math.acos(q4)
-    x = q1 / math.sin(halftheta)
-    y = q2 / math.sin(halftheta)
-    z = q3 / math.sin(halftheta)
-    return x,y,z,halftheta*2
-#print "%.2f %.2f %.2f %.2f" % (x,y,z,math.degrees(halftheta*2))
-
-
 class StraightAhead(collections.deque):
     def navigate(self,physics):
         physics.quaternion = Quaternion.from_euler((math.pi,0,0))
