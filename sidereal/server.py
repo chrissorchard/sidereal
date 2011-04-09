@@ -22,7 +22,7 @@ class DigestDict(dict):
         self['digest'] = digest
 
     def verify(self):
-        our_digest = self['digest']
+        our_digest = self.get('digest',None)
 
         dcopy = self.copy()
 
