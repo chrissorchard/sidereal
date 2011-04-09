@@ -1,8 +1,8 @@
 import json
 import hashlib
+import sys
 
 from twisted.internet.protocol import DatagramProtocol
-from twisted.internet import reactor
 
 class DigestDict(dict):
     def digest(self):
@@ -37,11 +37,46 @@ class DigestDict(dict):
         return our_digest == their_digest
 
 
-class Echo(DatagramProtocol):
+class Server(object):
+    port = 25005
+
+    def setup(self):
+        from twisted.internet import reactor
+        self.reactor = reactor
+        reactor.listenUDP(self.port,Protocol())
+
+    def run(self):
+        self.reactor.run()
+
+class Protocol(DatagramProtocol):
+    def __init__(self):
+        self.clients = {}
 
     def datagramReceived(self, data, (host, port)):
-        print "received %r from %s:%d" % (data, host, port)
-        self.transport.write(data, (host, port))
+        # all of our data is in JSON.
+        try:
+            d = json.loads(data,object_pairs_hook=DigestDict)
+        except ValueError as e:
+            # BAD JSON
 
+            # TODO Complain on the log
+            sys.stderr.write("Bad data: {0}".format(data))
+            return
+
+        # then verify the hash
+
+        if not d.verify():
+            # BAD HASH
+
+            # TODO also complain on the log
+            sys.stderr.write("Bad digest: {0}".format(data))
+            return
+
+        print "DO STUFF"
+
+        print "received %r from %s:%d" % (data, host, port)
+        #self.transport.write(data, (host, port))
+
+# we want to listen on port 25005
 #reactor.listenUDP(9999, Echo())
 #reactor.run()
