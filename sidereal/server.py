@@ -52,6 +52,9 @@ class Protocol(DatagramProtocol):
     def __init__(self):
         self.clients = {}
 
+        # FIXME THIS IS A DEBUG VALUE
+        self.player_slots = set([1,2,3,4])
+
     def datagramReceived(self, data, (host, port)):
         # all of our data is in JSON.
         try:
@@ -72,10 +75,45 @@ class Protocol(DatagramProtocol):
             sys.stderr.write("Bad digest: {0}".format(data))
             return
 
-        print "DO STUFF"
+        self.process_message(d,(host,port))
 
-        print "received %r from %s:%d" % (data, host, port)
-        #self.transport.write(data, (host, port))
+    def process_message(self,d,(host,port)):
+        type = d['type']
+        message = DigestDict()
+
+        if type == "knock":
+            # start crafting response
+            message['type'] = 'knock-responce'
+
+
+            # check for game full
+            if len(self.player_slots) == 0:
+                # GAME IS FULL.
+                # Rejected.
+
+                message['answer'] = False
+
+            else:
+                request = d.get('player_request',None)
+                if request in self.player_slots:
+                    self.player_slots.remove(request)
+                    assigned = request
+                else:
+                    assigned = self.player_slots.pop()
+
+                self.clients[(host,port)] = assigned
+
+                message['answer'] = True
+                message['slot'] = assigned
+
+                # Maybe later we can give them "tokens"
+                # so if they rejoin under a different ip, or just again
+                # it goes: OH WAIT, UR PLAYER 6, LET ME FIX THAT
+
+        if message:
+            message.digest()
+            jmessage = json.dumps(message)
+            self.transport.write(jmessage, (host,port))
 
 # we want to listen on port 25005
 #reactor.listenUDP(9999, Echo())
