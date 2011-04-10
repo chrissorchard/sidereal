@@ -3,6 +3,7 @@ import hashlib
 import sys
 
 from twisted.internet.protocol import DatagramProtocol
+from twisted.manhole import telnet
 
 from sidereal.network import DigestDict
 
@@ -14,8 +15,20 @@ class Server(object):
         self.reactor = reactor
         reactor.listenUDP(self.port,Protocol())
 
+        # set up an interpreter shell running at port 2000
+        reactor.callWhenRunning(self.shell_server)
+
+    def shell_server(self):
+        factory = telnet.ShellFactory()
+        port = self.reactor.listenTCP(2000,factory)
+        factory.namespace.update(globals())
+        factory.username = 'username'
+        factory.password = 'password'
+        return port
+
     def run(self):
         self.reactor.run()
+
 
 class Protocol(DatagramProtocol):
     def __init__(self):
