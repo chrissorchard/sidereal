@@ -1,3 +1,6 @@
+import json
+import hashlib
+
 # random network utlity classes and functions
 
 class DigestDict(dict):
