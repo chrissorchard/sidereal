@@ -59,6 +59,16 @@ class Body(object):
         self.body.setAngularVel(avelocity)
     avelocity = property(_get_avelocity,_set_avelocity)
 
+    def snapshot(self):
+        # Returns a named tuple containing all important variables
+        return BodySnapshot(self.velocity,
+                            self.avelocity,
+                            self.quaternion,
+                            self.coord,
+                            self.mass)
+
+_fields = ['velocity','avelocity','quaternion','coord','mass']
+BodySnapshot = collections.namedtuple("BodySnapshot",_fields)
 
 def vector_orientation(physics):
     tempworld = World()
@@ -74,3 +84,4 @@ class World(ode.World):
     def __init__(self):
         ode.World.__init__(self)
         self.setGravity((0,0,0))
+
