@@ -3,37 +3,41 @@ import hashlib
 import sys
 
 from twisted.internet.protocol import DatagramProtocol
-from twisted.manhole import telnet
+from twisted.internet.task import LoopingCall
 
 from sidereal.network import DigestDict
+from sidereal.game import Gameloop
+
+DEFAULT_PORT = 25005
 
 class Server(object):
-    port = 25005
+    def __init__(self,gamestate=None):
+        # if not passed a gamestate, it'll make one of its own
+        if gamestate is None:
+            self.gamestate = Gamestate()
+
+        #TODO Make it possible to change from default
+        self.port = DEFAULT_PORT
+
+        self.protocol = ServerProcotol()
 
     def setup(self):
-        global reactor
+        # set up our UDP listener
         from twisted.internet import reactor
-        self.reactor = reactor
-        reactor.listenUDP(self.port,Protocol())
+        reactor.listenUDP(self.port,self.protocol)
 
-        # set up an interpreter shell running at port 2000
-        reactor.callWhenRunning(self.shell_server)
-
-    def shell_server(self):
-        factory = telnet.ShellFactory()
-        port = self.reactor.listenTCP(2000,factory)
-        factory.namespace.update(globals())
-        factory.username = 'username'
-        factory.password = 'password'
-        return port
+        # set the gamestate to tick every 0.01 seconds
+        self.gamestate_loop = LoopingCall(self.gamestate.kaujul_tick)
+        self.gamestate_loop.start(0.01,now=True)
 
     def run(self):
         self.reactor.run()
 
 
-class Protocol(DatagramProtocol):
-    def __init__(self):
+class ServerProtocol(DatagramProtocol):
+    def __init__(self,server):
         self.clients = {}
+        self.server = server
 
         # normal options
         #self.options = set(["verifydigest","stoprepeatjoins"])

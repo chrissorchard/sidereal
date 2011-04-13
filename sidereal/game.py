@@ -24,6 +24,11 @@ class Gamestate(object):
         
         # UNIVERSAL TIMER
         self.kaujul = 0
+        # mapping from kaujul time to world snapshot
+        self.kaujul_worldsnapshot = {}
+
+        # mapping (OLD,NEW) to diff
+        self.kaujul_diff = {}
 
     def new_gasau(self,navclass=None,ingameclass=None,visualreprclass=None):
         if navclass is None:
@@ -68,5 +73,28 @@ class Gamestate(object):
         for gasau,navigation in self.gasau_navigation.items():
             physics = self.gasau_physics[gasau]
             navigation.navigate(physics)
+
+    def kaujul_tick(self):
+        self.world.step(0.01)
+
+        # a worldsnapshot is a mapping of ingame ids to body snapshots
+        worldsnapshot = {}
+        for gasau,body in self.gasau_physics.items():
+            worldsnapshot[hash(gasau)] = body.snapshot()
+
+        # our diff isn't what is DIFFERENT, because in a physics
+        # simulation, practically everything's going to change
+        # each tick. What we want, is stuff that has differed in
+        # behaviour from what is expected
+
+        # don't compare snapshots if kaujul is 0
+        if self.kaujul != 0:
+            prevsnapshot = self.kaujul_worldsnapshot[self.kaujul]
+            diff = worldsnapshot.copy()
+            for id,body in worldsnapshot:
+                if body == prevsnapshot.get(id,None):
+                    del diff[id]
+
+        
 
 Gameloop = Gamestate 
