@@ -8,8 +8,8 @@ import sidereal.universe
 import sidereal.physics as physics
 import sidereal.panda
 
-class Gameloop(object):
-    def __init__(self,do_graphics = True):
+class Gamestate(object):
+    def __init__(self,do_graphics = False):
         self.do_graphics = do_graphics
 
         self.orders = []
@@ -21,6 +21,9 @@ class Gameloop(object):
 
         self.world = physics.World()
         self.space = ode.HashSpace()
+        
+        # UNIVERSAL TIMER
+        self.kaujul = 0
 
     def new_gasau(self,navclass=None,ingameclass=None,visualreprclass=None):
         if navclass is None:
@@ -66,4 +69,4 @@ class Gameloop(object):
             physics = self.gasau_physics[gasau]
             navigation.navigate(physics)
 
-
+Gameloop = Gamestate 
