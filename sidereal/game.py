@@ -23,9 +23,10 @@ class Gamestate(object):
         self.space = ode.HashSpace()
         
         # UNIVERSAL TIMER
-        self.kaujul = 0
+        self.timer = 0
         # mapping from kaujul time to world snapshot
-        self.kaujul_worldsnapshot = {}
+        self.kaujul_worldsnapshot = collections.OrderedDict()
+        self.maxsize = 300
 
         # mapping (OLD,NEW) to diff
         self.kaujul_diff = {}
@@ -82,19 +83,34 @@ class Gamestate(object):
         for gasau,body in self.gasau_physics.items():
             worldsnapshot[hash(gasau)] = body.snapshot()
 
+        self.kaujul_worldsnapshot[self.kaujul] = worldsnapshot
+
+        while len(self.kaujul_worldsnapshot) > self.maxsize:
+            # fifo order
+            self.kaujul_worldsnapshot.popitem(False)
+
+
         # our diff isn't what is DIFFERENT, because in a physics
         # simulation, practically everything's going to change
         # each tick. What we want, is stuff that has differed in
         # behaviour from what is expected
 
+        # this means change in avelocity, or velocity
+
         # don't compare snapshots if kaujul is 0
         if self.kaujul != 0:
             prevsnapshot = self.kaujul_worldsnapshot[self.kaujul]
             diff = worldsnapshot.copy()
-            for id,body in worldsnapshot:
-                if body == prevsnapshot.get(id,None):
-                    del diff[id]
+            for id,body in worldsnapshot.items():
+                if id in prevsnapshot:
+                    prevbody = prevsnapshot[id]
+                    if (body.velocity == prevbody.velocity and
+                        body.avelocity == prevbody.avelocity and
+                        body.mass == prevbody.mass):
+                        del diff[id]
 
-        
+            self.kaujul_diff[self.kaujul] = diff
+
+        self.kaujul += 1
 
 Gameloop = Gamestate 
