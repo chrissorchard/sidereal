@@ -20,7 +20,7 @@ class Server(object):
         self.port = DEFAULT_PORT
 
         self.protocol = JoinNotifier(self)
-        self.clients = []
+        self.clients = set()
 
     def setup(self):
         # set up our UDP listener
@@ -38,7 +38,7 @@ class Server(object):
         message.digest()
         
         for host,port in self.clients:
-            self.protocol.transport.write(str(message),(host,port))
+            self.protocol.transport.write(str(message)+"\n",(host,port))
 
 class JoinNotifier(protocol.DatagramProtocol):
     def __init__(self,server):
@@ -49,11 +49,15 @@ class JoinNotifier(protocol.DatagramProtocol):
             message = process_message(datagram)
         except ValueError as e:
             print e
+            return
         except BadDigest as e:
             print e
-        else:
-            if message['type'] == 'knock':
-                self.server.clients.append((host,port))
+            return
+
+        if message['type'] == 'knock':
+            self.server.clients.add((host,port))
+        elif message['type'] == 'stop':
+            self.server.clients.remove((host,port))
 
 
 class ServerProtocol(protocol.DatagramProtocol):
@@ -136,8 +140,12 @@ def process_message(m):
     # could throw a ValueError for bad JSON
 
     # then verify the hash
-    if not data.verify():
-        raise BadDigest(data)
+
+    # Set to False, to disable digest verify
+    DEBUG_verify = False #FIXME
+    # The fixme is so we'll remember to change this back.
+    if DEBUG_verify and not data.verify():
+        raise BadDigest("Bad digest for message: {0}".format(repr(data)))
     
     return data
 
