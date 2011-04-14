@@ -2,13 +2,11 @@ import collections
 
 import ode
 
-import sidereal.ships as ships
 import sidereal.navigation as navigation
 import sidereal.universe
 import sidereal.physics as physics
-import sidereal.panda
 
-class Gamestate(object):
+class Gameloop(object):
     def __init__(self,do_graphics = False):
         self.do_graphics = do_graphics
 
@@ -108,9 +106,43 @@ class Gamestate(object):
                         body.avelocity == prevbody.avelocity and
                         body.mass == prevbody.mass):
                         del diff[id]
-
             self.kaujul_diff[self.kaujul] = diff
 
         self.kaujul += 1
 
-Gameloop = Gamestate 
+class Gamestate(object):
+    def __init__(self):
+        # An ingame object, or agent, or gasau isn't a single entity
+        # It is a collection of different sets of data.
+        #
+        # Physics - It's physical location within space, speed, etc.
+        # Ingame - Ingame information, fuel, damage, affilation, orders etc.
+        # Navigation - Given waypoints, ingame, and physics, NAVIGATE
+        self._physics = {}
+        self._ingame = {}
+        self._nav = {}
+        
+        self._dirty = set()
+
+        self._world = physics.World()
+        
+        # UNIVERSE TIME, incremented on every tick.
+        self.time = 0
+
+        self.step_size = 0.01
+
+    def gasau_data(self,id):
+        physics = self._physics.get(id,None)
+        ingame = self._ingame.get(id,None)
+        nav = self._nav.get(id,None)
+        return physics,ingame,nav
+
+    def tick(self):
+        # Returns physics diff
+        self._world.step(self.step_size)
+
+    def physics_snapshot(self):
+        snapshot = {}
+        for id,physics in self._physics.items():
+            snapshot[id] = physics.snapshot()
+        return snapshot
