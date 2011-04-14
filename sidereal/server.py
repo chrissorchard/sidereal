@@ -2,11 +2,11 @@ import json
 import hashlib
 import sys
 
-from twisted.internet.protocol import DatagramProtocol
+from twisted.internet import protocol
 from twisted.internet.task import LoopingCall
 
-from sidereal.network import DigestDict
-from sidereal.game import Gameloop
+from sidereal.network import DigestDict, BadDigest
+import sidereal.game
 
 DEFAULT_PORT = 25005
 
@@ -14,12 +14,13 @@ class Server(object):
     def __init__(self,gamestate=None):
         # if not passed a gamestate, it'll make one of its own
         if gamestate is None:
-            self.gamestate = Gamestate()
+            self.gamestate = sidereal.game.Gamestate()
 
         #TODO Make it possible to change from default
         self.port = DEFAULT_PORT
 
-        self.protocol = ServerProcotol()
+        self.protocol = JoinNotifier(self)
+        self.clients = []
 
     def setup(self):
         # set up our UDP listener
@@ -27,14 +28,35 @@ class Server(object):
         reactor.listenUDP(self.port,self.protocol)
 
         # set the gamestate to tick every 0.01 seconds
-        self.gamestate_loop = LoopingCall(self.gamestate.kaujul_tick)
-        self.gamestate_loop.start(0.01,now=True)
+        self.gamestate_loop = LoopingCall(self.gamestate_wrapper)
+        self.gamestate_loop.start(0.01,now=False)
+    def gamestate_wrapper(self):
+        snapshot = self.gamestate.tick()
+        message = DigestDict()
+        message['snapshot'] = snapshot
+        message['time'] = self.gamestate.time
+        message.digest()
+        
+        for host,port in self.clients:
+            self.protocol.transport.write(str(message),(host,port))
 
-    def run(self):
-        self.reactor.run()
+class JoinNotifier(protocol.DatagramProtocol):
+    def __init__(self,server):
+        self.server = server
+
+    def datagramReceived(self, datagram, (host,port)):
+        try:
+            message = process_message(datagram)
+        except ValueError as e:
+            print e
+        except BadDigest as e:
+            print e
+        else:
+            if message['type'] == 'knock':
+                self.server.clients.append((host,port))
 
 
-class ServerProtocol(DatagramProtocol):
+class ServerProtocol(protocol.DatagramProtocol):
     def __init__(self,server):
         self.clients = {}
         self.server = server
@@ -50,23 +72,6 @@ class ServerProtocol(DatagramProtocol):
 
     def datagramReceived(self, data, (host, port)):
         # all of our data is in JSON.
-        try:
-            d = json.loads(data,object_pairs_hook=DigestDict)
-        except ValueError as e:
-            # BAD JSON
-
-            # TODO Complain on the log
-            sys.stderr.write("Bad data: {0}".format(data))
-            return
-
-        # then verify the hash
-
-        if not d.verify() and "verifydigest" in self.options:
-            # BAD HASH
-
-            # TODO also complain on the log
-            sys.stderr.write("Bad digest: {0}".format(data))
-            return
 
         self.process_message(d,(host,port))
 
@@ -125,6 +130,16 @@ class ServerProtocol(DatagramProtocol):
                 personalised = message.copy()
                 personalised['slot'] = playerid
                 self.transport.write(json.dumps(personalised),(host,port))
+
+def process_message(m):
+    data = json.loads(m,object_pairs_hook=DigestDict)
+    # could throw a ValueError for bad JSON
+
+    # then verify the hash
+    if not data.verify():
+        raise BadDigest(data)
+    
+    return data
 
 
 # we want to listen on port 25005
