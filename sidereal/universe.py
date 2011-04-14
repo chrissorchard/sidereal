@@ -3,26 +3,44 @@ in which all ingame object occupy. It should keep track of all in-game
 related objects, such as ships, explosions, projectiles, and so on, or be
 able to keep track of them on demand."""
 
-import weakref
+import logging
 
-__all__ = ["Universe","get_unique_id"]
+# A gasau is an ingame object or agent.
+
+# Basically, we may have loggers in the gasau.* hierachy, but by default
+# we're not going to listen to them. If you change your mind, you'll
+# need to add additional handlers
+
+# Make us compatible with python2.6
+try:
+    _nullhandler = logging.NullHandler()
+except AttributeError:
+    class _NullHandler(logging.Handler):
+        def emit(self, record):
+            pass
+    _nullhandler = _NullHandler()
+
+logging.getLogger("gasau").addHandler(_nullhandler)
+
+
+__all__ = ["Universe","id","logger"]
 
 class Universe(object):
     def __init__(self):
         self._id = 0
-        self.idmap = weakref.WeakValueDictionary()
-    def get_unique_id(self,obj):
-        """An object calls this method, passing a reference to itself,
-        and is returned a unique integer, which will uniquely identify
-        it.
+    def id(self):
+        """Returns a unique id.
         """
         id = self._id
         self._id += 1
-        self.idmap[id] = obj
         return id
+    def logger(self,id):
+        """Returns a logger for the specified id"""
+        return logging.getLogger("gasau.{0}".format(id))
 
 # inspired by python's random module, create one instance, and export its
 # functions as module-level functions. The user can create their own
 # Universe() instance if they like
 _inst = Universe()
-get_unique_id = _inst.get_unique_id
+id = _inst.id
+logger = _inst.logger
