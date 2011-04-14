@@ -112,18 +112,7 @@ class Gameloop(object):
 
 class Gamestate(object):
     def __init__(self):
-        # An ingame object, or agent, or gasau isn't a single entity
-        # It is a collection of different sets of data.
-        #
-        # Physics - It's physical location within space, speed, etc.
-        # Ingame - Ingame information, fuel, damage, affilation, orders etc.
-        # Navigation - Given waypoints, ingame, and physics, NAVIGATE
         self._physics = {}
-        self._ingame = {}
-        self._nav = {}
-        
-        self._dirty = set()
-
         self._world = physics.World()
         
         # UNIVERSE TIME, incremented on every tick.
@@ -131,15 +120,10 @@ class Gamestate(object):
 
         self.step_size = 0.01
 
-    def gasau_data(self,id):
-        physics = self._physics.get(id,None)
-        ingame = self._ingame.get(id,None)
-        nav = self._nav.get(id,None)
-        return physics,ingame,nav
-
     def tick(self):
         # Returns physics diff
         self._world.step(self.step_size)
+        return self.physics_snapshot()
 
     def physics_snapshot(self):
         snapshot = {}
