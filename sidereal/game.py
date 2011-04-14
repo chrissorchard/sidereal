@@ -123,6 +123,7 @@ class Gamestate(object):
     def tick(self):
         # Returns physics diff
         self._world.step(self.step_size)
+        self.time += 1
         return self.physics_snapshot()
 
     def physics_snapshot(self):
