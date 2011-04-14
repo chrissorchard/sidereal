@@ -14,7 +14,7 @@ class DigestDict(dict):
         N = len(hasher.hexdigest())
         dcopy['digest'] = "0"*N
         
-        representation = json.dumps(dcopy,sort_keys=True,indent=4)
+        representation = str(dcopy)
         hasher.update(representation)
         digest = hasher.hexdigest()
 
@@ -29,8 +29,15 @@ class DigestDict(dict):
         N = len(hasher.hexdigest())
         dcopy['digest'] = "0"*N
         
-        representation = json.dumps(dcopy,sort_keys=True,indent=4)
+        representation = str(dcopy)
         hasher.update(representation)
         their_digest = hasher.hexdigest()
 
         return our_digest == their_digest
+    def __str__(self):
+        return json.dumps(self,sort_keys=True,indent=4)
+    def __repr__(self):
+        return json.dumps(self,sort_keys=True)
+
+class BadDigest(Exception):
+    pass
