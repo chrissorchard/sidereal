@@ -20,7 +20,13 @@ class Server(object):
         self.port = DEFAULT_PORT
 
         self.protocol = JoinNotifier(self)
+
         self.clients = set()
+        self.unsynced = set()
+
+    def add_client(self,(host,port)):
+        self.clients.add((host,port))
+        self.unsynced.add((host,port))
 
     def setup(self):
         # set up our UDP listener
@@ -31,14 +37,49 @@ class Server(object):
         self.gamestate_loop = LoopingCall(self.gamestate_wrapper)
         self.gamestate_loop.start(0.01,now=False)
     def gamestate_wrapper(self):
-        snapshot = self.gamestate.tick()
-        message = DigestDict()
-        message['snapshot'] = snapshot
-        message['time'] = self.gamestate.time
-        message.digest()
+        # Either, everyone gets a snapshot/keyframe,
+        # or only the unsynced ones get them, and everyone else
+        # gets a diff
+        diff = self.gamestate.tick()
+
+        diff_empty = len(diff) == 0
+        
+        # Is it time for a keyframe?
+        keyframe_time = self.gamestate.time % 1000 == 0
+
+        snapshot = self.gamestate.physics_snapshot()
+
+        prepare_snapshot = keyframe_time or (len(self.unsynced) != 0)
+
+        if prepare_snapshot:
+            snapshot = self.gamestate.physics_snapshot()
+            snapmessages = []
+            for id,physics in snapshot:
+                snapmessage = DigestDict()
+                snapmessage['type'] = 'snap'
+                snapmessage['id'] = id
+                snapmessage['time'] = self.gamestate.time
+                snapmessage.digest()
+        
+        if not keyframe_time and not diff_empty:
+            diffmessage = DigestDict()
+            diffmessage['diff'] = diff
+            diffmessage['time'] = self.gamestate.time
+            diffmessage.digest()
+
         
         for host,port in self.clients:
-            self.protocol.transport.write(str(message)+"\n",(host,port))
+            unsynced = (host,port) in self.unsynced
+
+            if keyframe_time or unsynced:
+                if unsynced:
+                    self.unsynced.remove((host,port))
+                # transmit the snapshot
+                self.protocol.transport.write(str(snapmessage)+"\n",(host,port))
+                print len(str(snapmessage))
+            elif not diff_empty:
+                # send a diff
+                self.protocol.transport.write(str(diffmessage)+"\n",(host,port))
 
 class JoinNotifier(protocol.DatagramProtocol):
     def __init__(self,server):
@@ -54,10 +95,14 @@ class JoinNotifier(protocol.DatagramProtocol):
             print e
             return
 
-        if message['type'] == 'knock':
-            self.server.clients.add((host,port))
-        elif message['type'] == 'stop':
-            self.server.clients.remove((host,port))
+        if message.get('type',None) == 'knock':
+            self.server.add_client((host,port))
+            
+        elif message.get('type',None) == 'stop':
+            # discard means, remove if present
+            self.server.clients.discard((host,port))
+        else:
+            print "Unrecognised message: " + repr(message)
 
 
 class ServerProtocol(protocol.DatagramProtocol):
@@ -149,6 +194,13 @@ def process_message(m):
     
     return data
 
+def create_digests(snap_or_diff):
+    digests = []
+    for id,physics in snap_or_diff:
+        snapmessage['id'] = id
+        snapmessage['physics'] = physics
+
+    
 
 # we want to listen on port 25005
 #reactor.listenUDP(9999, Echo())
