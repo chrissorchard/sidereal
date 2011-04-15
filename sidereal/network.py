@@ -126,3 +126,32 @@ class PacketReciever(protocol.DatagramProtocol):
         self.handler.handle(message,(host,port))
 
 
+# flag variables
+# We have a byte's worth, so that's 8 flags, so 128 is our highest.
+flags = {}
+flags['ACK'] = 1
+# 2
+# 4
+# 8
+# 16
+# 32
+# 64
+flags['AWESOME'] = 128
+
+def flag_unpack(i):
+    # given an integer, return a set of keys
+    keys = set()
+    for flag,value in flags.items():
+        if i & value == value:
+            keys.add(flag)
+    return keys
+
+def flag_pack(s):
+    # given a set, or something that support "in"
+    # returns an integer
+    value = 0
+    while s:
+        flag = s.pop()
+        if flag in flags:
+            value = value | flags[flag]
+    return value
