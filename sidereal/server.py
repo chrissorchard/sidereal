@@ -5,7 +5,8 @@ import sys
 from twisted.internet import protocol
 from twisted.internet.task import LoopingCall
 
-from sidereal.network import DigestDict, BadDigest, calculate_packet
+from sidereal.network import (DigestDict, BadDigest, BadLength,
+                              calculate_packet, unpack_packet)
 import sidereal.game
 
 DEFAULT_PORT = 25005
@@ -87,11 +88,15 @@ class JoinNotifier(protocol.DatagramProtocol):
 
     def datagramReceived(self, datagram, (host,port)):
         try:
-            message = process_message(datagram)
-        except ValueError as e:
+            sequence,hash,flags,length,data = unpack_packet(datagram)
+            message = json.loads(data)
+        except BadLength as e:
             print e
             return
         except BadDigest as e:
+            print e
+            return
+        except ValueError as e:
             print e
             return
 
