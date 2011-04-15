@@ -5,7 +5,7 @@ import sys
 from twisted.internet import protocol
 from twisted.internet.task import LoopingCall
 
-from sidereal.network import DigestDict, BadDigest
+from sidereal.network import DigestDict, BadDigest, calculate_packet
 import sidereal.game
 
 DEFAULT_PORT = 25005
@@ -54,19 +54,17 @@ class Server(object):
         if prepare_snapshot:
             snapshot = self.gamestate.physics_snapshot()
             snapmessages = []
-            for id,physics in snapshot:
+            for id,physics in snapshot.items():
                 snapmessage = DigestDict()
                 snapmessage['type'] = 'snap'
                 snapmessage['id'] = id
                 snapmessage['time'] = self.gamestate.time
-                snapmessage.digest()
+                snapmessages.append(snapmessage)
 
         if not keyframe_time and not diff_empty:
-            diffmessage = DigestDict()
+            diffmessage = {}
             diffmessage['diff'] = diff
             diffmessage['time'] = self.gamestate.time
-            diffmessage.digest()
-
 
         for host,port in self.clients:
             unsynced = (host,port) in self.unsynced
@@ -75,11 +73,13 @@ class Server(object):
                 if unsynced:
                     self.unsynced.remove((host,port))
                 # transmit the snapshot
-                self.protocol.transport.write(str(snapmessage)+"\n",(host,port))
-                print len(str(snapmessage))
+                for snapmessage in snapmessages:
+                    m = calculate_packet(json.dumps(snapmessage) + "\n")
+                    self.protocol.transport.write(m,(host,port))
             elif not diff_empty:
                 # send a diff
-                self.protocol.transport.write(str(diffmessage)+"\n",(host,port))
+                m = calculate_packet(json.dumps(diffmessage) + "\n")
+                self.protocol.transport.write(m,(host,port))
 
 class JoinNotifier(protocol.DatagramProtocol):
     def __init__(self,server):
