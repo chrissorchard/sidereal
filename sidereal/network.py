@@ -66,21 +66,18 @@ class PseudoHeader(object):
     """
 
     @classmethod
-    def calculate(cls,data,sequence=0,**kwargs):
+    def calculate(cls,data,sequence=0,flagnum=0):
         # data should be a string, otherwise, convert it
         data = str(data)
 
-        # do flags
-        flags = 0 | 1 | 4
-
         length = cls.length + len(data)
 
-        packet = struct.pack(cls.format,sequence,"0"*16,flags,length)
+        packet = struct.pack(cls.format,sequence,"0"*16,flagnum,length)
         hasher = hashlib.md5()
         hasher.update(packet)
         hash = hasher.digest()
 
-        return struct.pack(cls.format,sequence,hash,flags,length) + data
+        return struct.pack(cls.format,sequence,hash,flagnum,length) + data
 
     @classmethod
     def unpack(cls,data,check_hash=True):
@@ -123,7 +120,7 @@ class PacketReciever(protocol.DatagramProtocol):
         except ValueError as e:
             print e
             return
-        self.handler.handle(message,(host,port))
+        self.handler.handle(message,(host,port),sequence,flags)
 
 
 # flag variables
