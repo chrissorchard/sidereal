@@ -13,7 +13,7 @@ class DigestDict(dict):
         hasher = hashlib.new('md5')
         N = len(hasher.hexdigest())
         dcopy['digest'] = "0"*N
-        
+
         representation = str(dcopy)
         hasher.update(representation)
         digest = hasher.hexdigest()
@@ -28,7 +28,7 @@ class DigestDict(dict):
         hasher = hashlib.new('md5')
         N = len(hasher.hexdigest())
         dcopy['digest'] = "0"*N
-        
+
         representation = str(dcopy)
         hasher.update(representation)
         their_digest = hasher.hexdigest()

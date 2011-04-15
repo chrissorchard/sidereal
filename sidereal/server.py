@@ -43,7 +43,7 @@ class Server(object):
         diff = self.gamestate.tick()
 
         diff_empty = len(diff) == 0
-        
+
         # Is it time for a keyframe?
         keyframe_time = self.gamestate.time % 1000 == 0
 
@@ -60,14 +60,14 @@ class Server(object):
                 snapmessage['id'] = id
                 snapmessage['time'] = self.gamestate.time
                 snapmessage.digest()
-        
+
         if not keyframe_time and not diff_empty:
             diffmessage = DigestDict()
             diffmessage['diff'] = diff
             diffmessage['time'] = self.gamestate.time
             diffmessage.digest()
 
-        
+
         for host,port in self.clients:
             unsynced = (host,port) in self.unsynced
 
@@ -97,7 +97,7 @@ class JoinNotifier(protocol.DatagramProtocol):
 
         if message.get('type',None) == 'knock':
             self.server.add_client((host,port))
-            
+
         elif message.get('type',None) == 'stop':
             # discard means, remove if present
             self.server.clients.discard((host,port))
@@ -112,7 +112,7 @@ class ServerProtocol(protocol.DatagramProtocol):
 
         # normal options
         #self.options = set(["verifydigest","stoprepeatjoins"])
-        
+
         # debug options
         self.options = set(["stoprepeatjoins"])
 
@@ -191,7 +191,7 @@ def process_message(m):
     # The fixme is so we'll remember to change this back.
     if DEBUG_verify and not data.verify():
         raise BadDigest("Bad digest for message: {0}".format(repr(data)))
-    
+
     return data
 
 def create_digests(snap_or_diff):
@@ -200,7 +200,7 @@ def create_digests(snap_or_diff):
         snapmessage['id'] = id
         snapmessage['physics'] = physics
 
-    
+
 
 # we want to listen on port 25005
 #reactor.listenUDP(9999, Echo())
