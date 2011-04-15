@@ -11,6 +11,30 @@ import sidereal.game
 
 DEFAULT_PORT = 25005
 
+class Handler(object):
+    def __init__(self,server):
+        self.server = server
+        self.type_action = {}
+
+        self.type_action['knock'] = self.do_knock
+        self.type_action['stop'] = self.do_stop
+
+    def handle(self,data,(host,port)):
+        # Assuming data is a dictionary type object.
+        type = data.get('type',None)
+        if type in self.type_action:
+            # call our type with data, (host,port) as arguments
+            self.type_action[type](data,(host,port))
+        else:
+            print "No action found for packet type: {0}".format(type)
+            return False
+
+    def do_knock(self,data,(host,port)):
+        self.server.add_client((host,port))
+
+    def do_stop(self,data,(host,port)):
+        self.server.clients.discard((host,port))
+
 class Server(object):
     def __init__(self,gamestate=None):
         # if not passed a gamestate, it'll make one of its own
@@ -21,6 +45,7 @@ class Server(object):
         self.port = DEFAULT_PORT
 
         self.protocol = JoinNotifier(self)
+        self.handler = Handler(self)
 
         self.clients = set()
         self.unsynced = set()
@@ -100,15 +125,7 @@ class JoinNotifier(protocol.DatagramProtocol):
             print e
             return
 
-        if message.get('type',None) == 'knock':
-            self.server.add_client((host,port))
-
-        elif message.get('type',None) == 'stop':
-            # discard means, remove if present
-            self.server.clients.discard((host,port))
-        else:
-            print "Unrecognised message: " + repr(message)
-
+        self.server.handler.handle(message,(host,port))
 
 class ServerProtocol(protocol.DatagramProtocol):
     def __init__(self,server):
