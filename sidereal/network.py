@@ -3,6 +3,8 @@ import hashlib
 import struct
 import warnings
 
+DEFAULT_PORT = 25005
+
 # random network utlity classes and functions
 
 class DigestDict(dict):

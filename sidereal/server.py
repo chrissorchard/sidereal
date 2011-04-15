@@ -5,11 +5,10 @@ import sys
 from twisted.internet import protocol
 from twisted.internet.task import LoopingCall
 
+import sidereal.network
 from sidereal.network import (DigestDict, BadDigest, BadLength,
                               calculate_packet, unpack_packet)
 import sidereal.game
-
-DEFAULT_PORT = 25005
 
 class Handler(object):
     def __init__(self,server):
@@ -42,7 +41,7 @@ class Server(object):
             self.gamestate = sidereal.game.Gamestate()
 
         #TODO Make it possible to change from default
-        self.port = DEFAULT_PORT
+        self.port = sidereal.network.DEFAULT_PORT
 
         self.protocol = JoinNotifier(self)
         self.handler = Handler(self)
