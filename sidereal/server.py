@@ -43,8 +43,8 @@ class Server(object):
         #TODO Make it possible to change from default
         self.port = sidereal.network.DEFAULT_PORT
 
-        self.protocol = JoinNotifier(self)
         self.handler = Handler(self)
+        self.protocol = sidereal.network.PacketReciever(self.handler)
 
         self.clients = set()
         self.unsynced = set()
@@ -105,26 +105,6 @@ class Server(object):
                 # send a diff
                 m = calculate_packet(json.dumps(diffmessage) + "\n")
                 self.protocol.transport.write(m,(host,port))
-
-class JoinNotifier(protocol.DatagramProtocol):
-    def __init__(self,server):
-        self.server = server
-
-    def datagramReceived(self, datagram, (host,port)):
-        try:
-            sequence,hash,flags,length,data = unpack_packet(datagram)
-            message = json.loads(data)
-        except BadLength as e:
-            print e
-            return
-        except BadDigest as e:
-            print e
-            return
-        except ValueError as e:
-            print e
-            return
-
-        self.server.handler.handle(message,(host,port))
 
 class ServerProtocol(protocol.DatagramProtocol):
     def __init__(self,server):

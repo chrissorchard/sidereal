@@ -3,6 +3,8 @@ import hashlib
 import struct
 import warnings
 
+from twisted.internet import protocol
+
 DEFAULT_PORT = 25005
 
 # random network utlity classes and functions
@@ -101,3 +103,26 @@ class PseudoHeader(object):
 
 calculate_packet = PseudoHeader.calculate
 unpack_packet = PseudoHeader.unpack
+
+# packet handler
+class PacketReciever(protocol.DatagramProtocol):
+    def __init__(self,handler):
+        # has to have a .handle method
+        self.handler = handler
+
+    def datagramReceived(self, datagram, (host,port)):
+        try:
+            sequence,hash,flags,length,data = unpack_packet(datagram)
+            message = json.loads(data)
+        except BadLength as e:
+            print e
+            return
+        except BadDigest as e:
+            print e
+            return
+        except ValueError as e:
+            print e
+            return
+        self.handler.handle(message,(host,port))
+
+
