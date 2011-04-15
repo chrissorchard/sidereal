@@ -1,5 +1,4 @@
 import collections
-
 import ode
 
 import sidereal.navigation as navigation
@@ -19,7 +18,7 @@ class Gameloop(object):
 
         self.world = physics.World()
         self.space = ode.HashSpace()
-        
+
         # UNIVERSAL TIMER
         self.timer = 0
         # mapping from kaujul time to world snapshot
@@ -114,15 +113,15 @@ class Gamestate(object):
     def __init__(self):
         self._physics = {}
         self._world = physics.World()
-        
-        # Set of all changed items for the diff. 
+
+        # Set of all changed items for the diff.
         self._dirty = set()
-        
+
         # UNIVERSE TIME, incremented on every tick.
         self.time = 0
 
         self.step_size = 0.01
-    
+
     def new_body(self,id):
         self._physics[id] = body = physics.Body(self._world)
         self.mark_dirty(id)

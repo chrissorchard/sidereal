@@ -60,7 +60,7 @@ class FakeNav(collections.deque):
         velocity = vector.v(physics.velocity)
         #physics.quaternion = rotation
         v = vector.Vector(self.target) - vector.Vector(physics.coord)
- 
+
         if velocity.length < 1000:
             physics.body.addForce(v.normalised()*1000)
 

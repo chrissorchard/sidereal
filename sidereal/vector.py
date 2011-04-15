@@ -300,7 +300,7 @@ class Vector(tuple):
         if self.is_zero:
             return self
         return self.normalised()
-    
+
     # TODO vector.Vector.perpendicular
     def perpendicular(self):
         """Compute the perpendicular.

@@ -47,12 +47,12 @@ class MainView(object):
         self.focuspoint = (0,0,0)
         self.camera_position = (0,0,0)
         self.zoom = 100
-        
+
         # where max, is maximum zoom out
         # where min, is minimum zoon in
         self.maxzoom = 300
         self.minzoom = 10
-        
+
         # setting sensitivity to negative inverts the axis
         self.horizontal_sensitivity = -0.5 # Higher is more precise
         # As in, slower
@@ -60,7 +60,7 @@ class MainView(object):
         self.spherepoint = SpherePoint(self.zoom,0,0.5)
 
         self.set_up_event_handlers()
-        
+
         # always follow camera
         self.base.taskMgr.add(self._pandatask_update_camera,'cameraupdate')
 
@@ -131,7 +131,7 @@ class MainView(object):
         vertical = min(vertical,0.999999)
         vertical = max(vertical,0.000001)
         self.spherepoint.vertical = vertical
-            
+
         return task.again
 
     def _update_camera(self):
@@ -153,14 +153,14 @@ class MainView(object):
 class SpherePoint(object):
     """Manipulating a camera on a sphere's surface seems complicated.
     As such, this class SHOULD be helpful in that.
-    
-    Imagine the camera as a point on the sphere, which if you take a 
+
+    Imagine the camera as a point on the sphere, which if you take a
     2d flat horizontal slice is a circle. The camera is somewhere on
     that circle, at a certain angle. Where you take the 2d slice
     could be called the vertical.
-     
+
     The radius of the sphere should be obvious.
-    
+
     This sphere is centered on 0,0,0"""
     def __init__(self,radius,angle,vertical):
         """
@@ -183,12 +183,12 @@ class SpherePoint(object):
 class FocusManager(collections.MutableSet):
     """The FocusManager the utility for maintaining focus on one to many
     game objects, with none being a special case.
-    
-    It is treated as a Set of objects, which should (TODO change to MUST) 
+
+    It is treated as a Set of objects, which should (TODO change to MUST)
     be ingame objects with coordinates. It can then determine the average
     point to focus on from all of its component objects.
-    
-    If objects leave the FocusManager (such as by being destroyed, or 
+
+    If objects leave the FocusManager (such as by being destroyed, or
     de-focused, the FocusManager then recalculates its "average".
     If all objects leave, then it will continue to stare at the last point
     a la CalHomeworld behaviour."""
