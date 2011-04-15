@@ -1,6 +1,7 @@
 import json
 import hashlib
 import struct
+import warnings
 
 # random network utlity classes and functions
 
@@ -10,6 +11,7 @@ class DigestDict(dict):
         # the element 'digest' contains N zeros, and it's printed
         # with indent 4, sorted
         # where N is the hash length
+        warnings.warn("DigestDict is deprecated",DeprecationWarning,stacklevel=2)
         dcopy = self.copy()
         hasher = hashlib.new('md5')
         N = len(hasher.hexdigest())
@@ -22,6 +24,7 @@ class DigestDict(dict):
         self['digest'] = digest
 
     def verify(self):
+        warnings.warn("DigestDict is deprecated",DeprecationWarning,stacklevel=2)
         our_digest = self.get('digest',None)
 
         dcopy = self.copy()
