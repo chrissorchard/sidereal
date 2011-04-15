@@ -9,7 +9,7 @@ import argparse
 
 from twisted.internet import stdio, protocol
 from twisted.protocols import basic
-
+import sidereal.network
 from sidereal.network import (calculate_packet, unpack_packet,
                               BadLength, BadDigest)
 
@@ -35,6 +35,8 @@ class Connection(protocol.DatagramProtocol):
             return
 
         print "Sequence:{},Flags:{},Length:{},Data:{}".format(sequence,flags,length,data.strip("\n"))
+        ackflag = sidereal.network.flag_pack(["ACK"])
+        self.transport.write(calculate_packet("{}",sequence,ackflag),(host,port))
 
 
 if __name__=='__main__':

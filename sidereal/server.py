@@ -1,6 +1,7 @@
 import json
 import hashlib
 import sys
+import collections
 
 from twisted.internet import protocol
 from twisted.internet.task import LoopingCall
@@ -10,6 +11,8 @@ from sidereal.network import (DigestDict, BadDigest, BadLength,
                               calculate_packet, unpack_packet)
 import sidereal.game
 
+TOO_LONG = 1000
+
 class Handler(object):
     def __init__(self,server):
         self.server = server
@@ -18,7 +21,13 @@ class Handler(object):
         self.type_action['knock'] = self.do_knock
         self.type_action['stop'] = self.do_stop
 
-    def handle(self,data,(host,port)):
+    def handle(self,data,(host,port),sequence=0,flags=0):
+        flagset = sidereal.network.flag_unpack(flags)
+        if 'ACK' in flagset:
+            # This isn't a normal packet, it's an ACK.
+            # The sequence number is the packet it is a reply to.
+            self.server.ack_packet(sequence)
+            return
         # Assuming data is a dictionary type object.
         type = data.get('type',None)
         if type in self.type_action:
@@ -49,6 +58,15 @@ class Server(object):
         self.clients = set()
         self.unsynced = set()
 
+        self.packet_reply = {}
+        self._sequence = 0
+
+    def next_sequence(self):
+        seq = self._sequence
+        self._sequence += 1
+        self._sequence %= 2**16
+        return seq
+
     def add_client(self,(host,port)):
         self.clients.add((host,port))
         self.unsynced.add((host,port))
@@ -62,6 +80,12 @@ class Server(object):
         self.gamestate_loop = LoopingCall(self.gamestate_wrapper)
         self.gamestate_loop.start(0.01,now=False)
     def gamestate_wrapper(self):
+        # First of all, increment the sent packets.
+
+        for packetcount in self.packet_reply.values():
+            packetcount[1] += 1
+            if packetcount[1] > TOO_LONG:
+                print "unacknowledged packet: {0}".format(packetcount[0])
         # Either, everyone gets a snapshot/keyframe,
         # or only the unsynced ones get them, and everyone else
         # gets a diff
@@ -99,12 +123,24 @@ class Server(object):
                     self.unsynced.remove((host,port))
                 # transmit the snapshot
                 for snapmessage in snapmessages:
-                    m = calculate_packet(json.dumps(snapmessage) + "\n")
-                    self.protocol.transport.write(m,(host,port))
+                    self.send_packet(snapmessage,(host,port))
             elif not diff_empty:
                 # send a diff
-                m = calculate_packet(json.dumps(diffmessage) + "\n")
-                self.protocol.transport.write(m,(host,port))
+                self.send_packet(diffmessage,(host,port))
+    def send_packet(self,data,(host,port)):
+        j = json.dumps(data)
+        seq = self.next_sequence()
+        packet = calculate_packet(j+"\n",seq)
+        packettuple = unpack_packet(packet)
+        self.packet_reply[seq] = [packettuple,0]
+        self.protocol.transport.write(packet,(host,port))
+    def ack_packet(self,sequence):
+        if sequence in self.packet_reply:
+            del self.packet_reply[sequence]
+        else:
+            print "WTF, {0} isn't a packet we've sent".format(sequence)
+
+
 
 class ServerProtocol(protocol.DatagramProtocol):
     def __init__(self,server):
