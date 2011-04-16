@@ -26,7 +26,7 @@ class Handler(object):
         if 'ACK' in flagset:
             # This isn't a normal packet, it's an ACK.
             # The sequence number is the packet it is a reply to.
-            self.server.ack_packet(sequence)
+            self.server.manager.ack_packet(sequence)
             return
         # Assuming data is a dictionary type object.
         type = data.get('type',None)
@@ -54,18 +54,10 @@ class Server(object):
 
         self.handler = Handler(self)
         self.protocol = sidereal.network.PacketReciever(self.handler)
+        self.manager = sidereal.network.PacketManager(self.protocol)
 
         self.clients = set()
         self.unsynced = set()
-
-        self.packet_reply = {}
-        self._sequence = 0
-
-    def next_sequence(self):
-        seq = self._sequence
-        self._sequence += 1
-        self._sequence %= 2**16
-        return seq
 
     def add_client(self,(host,port)):
         self.clients.add((host,port))
@@ -81,11 +73,8 @@ class Server(object):
         self.gamestate_loop.start(0.01,now=False)
     def gamestate_wrapper(self):
         # First of all, increment the sent packets.
+        self.manager.check()
 
-        for packetcount in self.packet_reply.values():
-            packetcount[1] += 1
-            if packetcount[1] > TOO_LONG:
-                print "unacknowledged packet: {0}".format(packetcount[0])
         # Either, everyone gets a snapshot/keyframe,
         # or only the unsynced ones get them, and everyone else
         # gets a diff
@@ -123,23 +112,10 @@ class Server(object):
                     self.unsynced.remove((host,port))
                 # transmit the snapshot
                 for snapmessage in snapmessages:
-                    self.send_packet(snapmessage,(host,port))
+                    self.manager.send_packet(snapmessage,(host,port))
             elif not diff_empty:
                 # send a diff
-                self.send_packet(diffmessage,(host,port))
-    def send_packet(self,data,(host,port)):
-        j = json.dumps(data)
-        seq = self.next_sequence()
-        packet = calculate_packet(j+"\n",seq)
-        packettuple = unpack_packet(packet)
-        self.packet_reply[seq] = [packettuple,0]
-        self.protocol.transport.write(packet,(host,port))
-    def ack_packet(self,sequence):
-        if sequence in self.packet_reply:
-            del self.packet_reply[sequence]
-        else:
-            print "WTF, {0} isn't a packet we've sent".format(sequence)
-
+                self.manager.send_packet(diffmessage,(host,port))
 
 
 class ServerProtocol(protocol.DatagramProtocol):

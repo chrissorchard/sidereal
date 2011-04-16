@@ -122,8 +122,39 @@ class PacketReciever(protocol.DatagramProtocol):
             return
         self.handler.handle(message,(host,port),sequence,flags)
 
-class PacketTracker(object):
-    pass
+class PacketManager(object):
+    def __init__(self,protocol):
+        self.protocol = protocol
+        # Mapping sequence to sent packets
+        # Keeps tracks of packets that have been sent, but not ACK'd
+        self.sent_packets = {}
+        self._sequence = 0
+    def next_sequence(self):
+        seq = self._sequence
+        self._sequence += 1
+        self._sequence %= 2**16
+        return seq
+    def send_packet(self,data,(host,port)):
+        j = json.dumps(data)
+        seq = self.next_sequence()
+        packet = calculate_packet(j+"\n",seq)
+        packettuple = unpack_packet(packet)
+        self.sent_packets[seq] = [packettuple,0]
+        self.protocol.transport.write(packet,(host,port))
+    def ack_packet(self,sequence):
+        if sequence in self.sent_packets:
+            del self.sent_packets[sequence]
+        else:
+            print "WTF, {0} isn't a packet we've sent".format(sequence)
+    def check(self):
+        """Check that we've been replied to."""
+        for packetcount in self.sent_packets.values():
+            packetcount[1] += 1
+            if packetcount[1] > TOO_LONG:
+                print "unacknowledged packet: {0}".format(packetcount[0])
+
+TOO_LONG = 1000
+
 
 # flag variables
 # We have a byte's worth, so that's 8 flags, so 128 is our highest.
