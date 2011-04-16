@@ -122,6 +122,8 @@ class PacketReciever(protocol.DatagramProtocol):
             return
         self.handler.handle(message,(host,port),sequence,flags)
 
+class PacketTracker(object):
+    pass
 
 # flag variables
 # We have a byte's worth, so that's 8 flags, so 128 is our highest.
