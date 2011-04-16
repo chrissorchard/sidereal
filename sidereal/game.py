@@ -38,7 +38,7 @@ class Gameloop(object):
         if visualreprclass is None and self.do_graphics:
             visualreprclass = sidereal.panda.Visualrepr
 
-        gasau = ships.Ship()
+        gasau = sidereal.universe.id()
         body = physics.Body(self.world)
 
         nav = navclass()
