@@ -2,6 +2,7 @@ import json
 import hashlib
 import sys
 import collections
+import time
 
 from twisted.internet import protocol
 from twisted.internet.task import LoopingCall
@@ -71,6 +72,10 @@ class Server(object):
         # set the gamestate to tick every 0.01 seconds
         self.gamestate_loop = LoopingCall(self.gamestate_wrapper)
         self.gamestate_loop.start(0.01,now=False)
+
+        self.heartbeat_loop = LoopingCall(self.heartbeat)
+        self.heartbeat_loop.start(2,now=False)
+
     def gamestate_wrapper(self):
         # First of all, increment the sent packets.
         self.manager.check()
@@ -116,6 +121,10 @@ class Server(object):
             elif not diff_empty:
                 # send a diff
                 self.manager.send_packet(diffmessage,(host,port))
+    def heartbeat(self):
+        for host,port in self.clients:
+            packet = {'type':'heartbeat','time':time.time()}
+            self.manager.send_packet(packet,(host,port))
 
 
 class ServerProtocol(protocol.DatagramProtocol):
