@@ -6,6 +6,8 @@ of our packets recieved, this is writing our own. It uses UDP.
 
 import os
 import argparse
+import time
+import json
 
 from twisted.internet import stdio, protocol
 from twisted.protocols import basic
@@ -22,6 +24,16 @@ class StdinInput(basic.LineReceiver):
         # The dude typed a line. Send it.
         conn.transport.write(calculate_packet(line),(HOST,PORT))
 
+class Handler(sidereal.network.Handler):
+    def __init__(self):
+        sidereal.network.Handler.__init__(self)
+
+        self.type_action['heartbeat'] = self.check_beat
+    def check_beat(self,data,(host,port)):
+        timediff = time.time() - data.get("time",0)
+        print "Difference of {} seconds.".format(timediff)
+
+
 class Connection(protocol.DatagramProtocol):
 
     def datagramReceived(self, payload, (host,port)):
@@ -37,6 +49,7 @@ class Connection(protocol.DatagramProtocol):
         print "Sequence:{},Flags:{},Length:{},Data:{}".format(sequence,flags,length,data.strip("\n"))
         ackflag = sidereal.network.flag_pack(["ACK"])
         self.transport.write(calculate_packet("{}",sequence,ackflag),(host,port))
+        handler.handle(json.loads(data),(host,port),sequence,flags)
 
 
 if __name__=='__main__':
@@ -52,6 +65,7 @@ if __name__=='__main__':
 
     textinput = StdinInput()
     conn = Connection()
+    handler = Handler()
 
     stdio.StandardIO(textinput)
 
