@@ -163,7 +163,7 @@ flags['ACK'] = 1
 # 2
 # 4
 # 8
-# 16
+flags['RAINBOW'] = 16
 # 32
 # 64
 flags['AWESOME'] = 128
