@@ -155,6 +155,27 @@ class PacketManager(object):
 
 TOO_LONG = 1000
 
+class Handler(object):
+    def __init__(self):
+        self.type_action = {}
+        self.flag_handler = {}
+
+    def handle(self,data,(host,port),sequence=0,flags=0):
+        flagset = flag_unpack(flags)
+        for flag in flagset:
+            if flag in self.flag_handler:
+                self.flag_handler[flag](data,(host,port),sequence,flags)
+
+        # Assuming data is a dictionary type object.
+        type = data.get('type',None)
+        if type in self.type_action:
+            # call our type with data, (host,port) as arguments
+            self.type_action[type](data,(host,port))
+        else:
+            #print "No action found for packet type: {0}".format(type)
+            #TODO replace with Twisted failure?
+            return False
+
 
 # flag variables
 # We have a byte's worth, so that's 8 flags, so 128 is our highest.

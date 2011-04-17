@@ -14,13 +14,15 @@ import sidereal.game
 
 TOO_LONG = 1000
 
-class Handler(object):
+class Handler(sidereal.network.Handler):
     def __init__(self,server):
+        sidereal.network.Handler.__init__(self)
         self.server = server
-        self.type_action = {}
 
         self.type_action['knock'] = self.do_knock
         self.type_action['stop'] = self.do_stop
+
+        self.flag_handler['ACK'] = self.handle_ack
 
     def handle(self,data,(host,port),sequence=0,flags=0):
         flagset = sidereal.network.flag_unpack(flags)
@@ -37,6 +39,8 @@ class Handler(object):
         else:
             print "No action found for packet type: {0}".format(type)
             return False
+    def handle_ack(self,data,(host,port),sequence,flags):
+        self.server.manager.ack_packet(sequence)
 
     def do_knock(self,data,(host,port)):
         self.server.add_client((host,port))
