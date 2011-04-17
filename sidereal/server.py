@@ -24,22 +24,9 @@ class Handler(sidereal.network.Handler):
 
         self.flag_handler['ACK'] = self.handle_ack
 
-    def handle(self,data,(host,port),sequence=0,flags=0):
-        flagset = sidereal.network.flag_unpack(flags)
-        if 'ACK' in flagset:
-            # This isn't a normal packet, it's an ACK.
-            # The sequence number is the packet it is a reply to.
-            self.server.manager.ack_packet(sequence)
-            return
-        # Assuming data is a dictionary type object.
-        type = data.get('type',None)
-        if type in self.type_action:
-            # call our type with data, (host,port) as arguments
-            self.type_action[type](data,(host,port))
-        else:
-            print "No action found for packet type: {0}".format(type)
-            return False
     def handle_ack(self,data,(host,port),sequence,flags):
+        # This isn't a normal packet, it's an ACK.
+        # The sequence number is the packet it is a reply to.
         self.server.manager.ack_packet(sequence)
 
     def do_knock(self,data,(host,port)):
