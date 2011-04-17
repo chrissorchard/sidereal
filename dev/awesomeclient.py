@@ -41,8 +41,8 @@ class Connection(protocol.DatagramProtocol):
 
 if __name__=='__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('HOST')
-    parser.add_argument('PORT',type=int)
+    parser.add_argument('HOST',default='127.0.0.1',nargs='?')
+    parser.add_argument('PORT',type=int,default=25005,nargs='?')
     args = parser.parse_args()
 
     global HOST
