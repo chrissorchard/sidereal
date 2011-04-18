@@ -54,6 +54,7 @@ class Handler(sidereal.network.Handler):
         snapshot = BodySnapshot(data['snapshot'])
 
         body = gamestate.get_body(id)
+        logger.debug(body.snapshot)
         body.unsnapshot(snapshot)
 
     # UGGGH repeated code

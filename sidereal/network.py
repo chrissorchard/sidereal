@@ -196,9 +196,9 @@ class Handler(object):
             # call our type with data, (host,port) as arguments
             self.type_action[type](data,(host,port))
         else:
-            #print "No action found for packet type: {0}".format(type)
+            logger.warning("No action found for packet type: {0}".format(type))
             #TODO replace with Twisted failure?
-            return False
+            #return False
     def do_debug(self,data,(host,port)):
         # An optional debug handler. Can be added like any other handler
         action = data.get('action',None)
