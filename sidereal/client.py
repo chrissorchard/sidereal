@@ -1,6 +1,7 @@
 import json
 import hashlib
 import sys
+import logging
 
 from twisted.internet import protocol
 from twisted.internet.task import LoopingCall
@@ -51,10 +52,10 @@ class Handler(sidereal.network.Handler):
         gamestate = self.client.gamestate
 
         id = data['id']
-        snapshot = BodySnapshot(data['snapshot'])
+        snapshot = sidereal.physics.BodySnapshot(*data['snapshot'])
 
         body = gamestate.get_body(id)
-        logger.debug(body.snapshot)
+        logging.debug(body.snapshot())
         body.unsnapshot(snapshot)
 
     # UGGGH repeated code
