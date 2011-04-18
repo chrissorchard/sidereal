@@ -34,6 +34,7 @@ class Client(object):
 
 class Handler(sidereal.network.Handler):
     def __init__(self,client):
+        sidereal.network.Handler.__init__(self)
         self.client = client
 
         # the server.Handler method will check this variable
