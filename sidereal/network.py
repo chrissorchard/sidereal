@@ -195,8 +195,8 @@ class Handler(object):
         if type in self.type_action:
             # call our type with data, (host,port) as arguments
             self.type_action[type](data,(host,port))
-        else:
-            logger.warning("No action found for packet type: {0}".format(type))
+        elif type is not None:
+            logging.warning("No action found for packet type: {0}".format(type))
             #TODO replace with Twisted failure?
             #return False
     def do_debug(self,data,(host,port)):
