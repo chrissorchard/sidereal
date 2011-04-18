@@ -1,4 +1,6 @@
 import sidereal.server
+import logging
+logging.basicConfig(level=logging.DEBUG)
 
 s = sidereal.server.Server(debug=True)
 s.setup()
