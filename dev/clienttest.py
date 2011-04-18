@@ -1,5 +1,6 @@
 import os
 import logging
+import json
 logging.basicConfig(level=logging.DEBUG)
 import sidereal.client
 
@@ -18,7 +19,11 @@ class StdinInput(basic.LineReceiver):
         pass
     def lineReceived(self, line):
         # The dude typed a line. Send it.
-        c.manager.send_packet(line,(HOST,PORT))
+
+        # of course, we're loading this data, when we're about to
+        # dump it in a second.
+        c.manager.send_packet(json.loads(line),(HOST,PORT))
+
 
 stdio.StandardIO(StdinInput())
 
