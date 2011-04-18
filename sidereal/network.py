@@ -6,6 +6,10 @@ import logging
 
 from twisted.internet import protocol
 
+from twisted.python.log import PythonLoggingObserver
+_observer = PythonLoggingObserver()
+_observer.start()
+
 DEFAULT_PORT = 25005
 
 # random network utlity classes and functions
