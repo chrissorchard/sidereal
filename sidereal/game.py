@@ -130,6 +130,12 @@ class Gamestate(object):
     def mark_dirty(self,id):
         self._dirty.add(id)
 
+    def get_body(self,id):
+        if id in self._physics:
+            return self._physics[id]
+        else:
+            return self.new_body(id)
+
     def tick(self):
         # Returns physics diff
         self._world.step(self.step_size)
