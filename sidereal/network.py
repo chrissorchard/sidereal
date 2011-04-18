@@ -2,6 +2,7 @@ import json
 import hashlib
 import struct
 import warnings
+import logging
 
 from twisted.internet import protocol
 
@@ -138,6 +139,9 @@ class PacketManager(object):
         j = json.dumps(data)
         seq = self.next_sequence()
         packet = calculate_packet(j+"\n",seq)
+        size = len(packet)
+        if size > 512:
+            logging.warning("Packet sent of size {0}".format(size))
         packettuple = unpack_packet(packet)
         self.sent_packets[seq] = [packettuple,0]
         self.protocol.transport.write(packet,(host,port))
