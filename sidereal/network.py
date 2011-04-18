@@ -116,6 +116,7 @@ class PacketReciever(protocol.DatagramProtocol):
     def datagramReceived(self, datagram, (host,port)):
         try:
             sequence,hash,flags,length,data = unpack_packet(datagram)
+            logging.debug(pretty_packet(datagram))
             message = json.loads(data)
         except BadLength as e:
             print e
