@@ -1,15 +1,12 @@
 import collections
-
 import ode
 
-import sidereal.ships as ships
 import sidereal.navigation as navigation
 import sidereal.universe
 import sidereal.physics as physics
-import sidereal.panda
 
 class Gameloop(object):
-    def __init__(self,do_graphics = True):
+    def __init__(self,do_graphics = False):
         self.do_graphics = do_graphics
 
         self.orders = []
@@ -22,6 +19,15 @@ class Gameloop(object):
         self.world = physics.World()
         self.space = ode.HashSpace()
 
+        # UNIVERSAL TIMER
+        self.timer = 0
+        # mapping from kaujul time to world snapshot
+        self.kaujul_worldsnapshot = collections.OrderedDict()
+        self.maxsize = 300
+
+        # mapping (OLD,NEW) to diff
+        self.kaujul_diff = {}
+
     def new_gasau(self,navclass=None,ingameclass=None,visualreprclass=None):
         if navclass is None:
             navclass = navigation.FakeNav
@@ -32,7 +38,7 @@ class Gameloop(object):
         if visualreprclass is None and self.do_graphics:
             visualreprclass = sidereal.panda.Visualrepr
 
-        gasau = ships.Ship()
+        gasau = sidereal.universe.id()
         body = physics.Body(self.world)
 
         nav = navclass()
@@ -66,4 +72,83 @@ class Gameloop(object):
             physics = self.gasau_physics[gasau]
             navigation.navigate(physics)
 
+    def kaujul_tick(self):
+        self.world.step(0.01)
 
+        # a worldsnapshot is a mapping of ingame ids to body snapshots
+        worldsnapshot = {}
+        for gasau,body in self.gasau_physics.items():
+            worldsnapshot[hash(gasau)] = body.snapshot()
+
+        self.kaujul_worldsnapshot[self.kaujul] = worldsnapshot
+
+        while len(self.kaujul_worldsnapshot) > self.maxsize:
+            # fifo order
+            self.kaujul_worldsnapshot.popitem(False)
+
+
+        # our diff isn't what is DIFFERENT, because in a physics
+        # simulation, practically everything's going to change
+        # each tick. What we want, is stuff that has differed in
+        # behaviour from what is expected
+
+        # this means change in avelocity, or velocity
+
+        # don't compare snapshots if kaujul is 0
+        if self.kaujul != 0:
+            prevsnapshot = self.kaujul_worldsnapshot[self.kaujul]
+            diff = worldsnapshot.copy()
+            for id,body in worldsnapshot.items():
+                if id in prevsnapshot:
+                    prevbody = prevsnapshot[id]
+                    if (body.velocity == prevbody.velocity and
+                        body.avelocity == prevbody.avelocity and
+                        body.mass == prevbody.mass):
+                        del diff[id]
+            self.kaujul_diff[self.kaujul] = diff
+
+        self.kaujul += 1
+
+class Gamestate(object):
+    def __init__(self):
+        self._physics = {}
+        self._world = physics.World()
+
+        # Set of all changed items for the diff.
+        self._dirty = set()
+
+        # UNIVERSE TIME, incremented on every tick.
+        self.time = 0
+
+        self.step_size = 0.01
+
+    def new_body(self,id):
+        self._physics[id] = body = physics.Body(self._world)
+        self.mark_dirty(id)
+        return body
+
+    def mark_dirty(self,id):
+        self._dirty.add(id)
+
+    def get_body(self,id):
+        if id in self._physics:
+            return self._physics[id]
+        else:
+            return self.new_body(id)
+
+    def tick(self):
+        # Returns physics diff
+        self._world.step(self.step_size)
+        self.time += 1
+        diff = {}
+        while self._dirty:
+            id = self._dirty.pop()
+            snapshot = self._physics[id].snapshot()
+            diff[id] = snapshot
+        return diff
+
+    def physics_snapshot(self):
+        snapshot = {}
+        for id,physics in self._physics.items():
+            snapshot[id] = physics.snapshot()
+        return snapshot
