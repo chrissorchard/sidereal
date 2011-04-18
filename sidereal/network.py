@@ -164,11 +164,18 @@ class PacketManager(object):
             print "WTF, {0} isn't a packet we've sent".format(sequence)
     def check(self):
         """Check that we've been replied to."""
-        for packetcount in self.sent_packets.values():
+        # FIXME Temporary fix for unacked. we will retrnsmit them
+        # eventually.
+        remove = set()
+        for sequence,packetcount in self.sent_packets.items():
             packetcount[1] += 1
             if packetcount[1] > TOO_LONG:
                 pretty = pretty_packet(packetcount[0])
                 print "unacknowledged packet: {0}".format(pretty)
+                remove.add(sequence)
+        while remove:
+            item = remove.pop()
+            del self.sent_packets[item]
 
 TOO_LONG = 1000
 
