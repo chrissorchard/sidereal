@@ -155,8 +155,7 @@ class PacketManager(object):
         size = len(packet)
         if size > 512:
             logging.warning("Packet sent of size {0}".format(size))
-        packettuple = unpack_packet(packet)
-        self.sent_packets[seq] = [packettuple,0]
+        self.sent_packets[seq] = [packet,0]
         self.protocol.transport.write(packet,(host,port))
     def ack_packet(self,sequence):
         if sequence in self.sent_packets:
@@ -168,7 +167,8 @@ class PacketManager(object):
         for packetcount in self.sent_packets.values():
             packetcount[1] += 1
             if packetcount[1] > TOO_LONG:
-                print "unacknowledged packet: {0}".format(packetcount[0])
+                pretty = pretty_packet(packetcount[0])
+                print "unacknowledged packet: {0}".format(pretty)
 
 TOO_LONG = 1000
 
