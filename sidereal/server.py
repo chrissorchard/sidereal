@@ -15,7 +15,7 @@ import sidereal.game
 TOO_LONG = 1000
 
 class Handler(sidereal.network.Handler):
-    def __init__(self,server):
+    def __init__(self,server,debug=False):
         sidereal.network.Handler.__init__(self)
         self.server = server
 
@@ -23,6 +23,10 @@ class Handler(sidereal.network.Handler):
         self.type_action['stop'] = self.do_stop
 
         self.flag_handler['ACK'] = self.handle_ack
+
+        if debug:
+            # use do_debug from base class
+            self.type_action['debug'] = self.do_debug
 
     def handle_ack(self,data,(host,port),sequence,flags):
         # This isn't a normal packet, it's an ACK.
