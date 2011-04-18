@@ -93,6 +93,7 @@ class Server(object):
                 snapmessage['type'] = 'snap'
                 snapmessage['id'] = id
                 snapmessage['time'] = self.gamestate.time
+                snapmessage['snapshot'] = physics
                 snapmessages.append(snapmessage)
 
         if not keyframe_time and not diff_empty:
