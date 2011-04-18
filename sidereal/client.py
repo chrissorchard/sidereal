@@ -11,6 +11,7 @@ from sidereal.network import (BadDigest, BadLength,
 import sidereal.network
 import sidereal.server
 import sidereal.game
+import sidereal.physics
 
 class Client(object):
     def __init__(self):
@@ -33,10 +34,18 @@ class Handler(sidereal.server.Handler):
         self.type_action = {"snap":self.keyframe_handler}
         self.type_action = {"diff":self.diff_handler}
     def keyframe_handler(self,data,(host,port)):
+        # FIXME Currently unused  #
         client_time = self.client.gamestate.time
         server_time = data['time']
+        #-------------------------#
+
         gamestate = self.client.gamestate
 
+        id = data['id']
+        snapshot = BodySnapshot(data['snapshot'])
+
+        body = gamestate.get_body(id)
+        body.unsnapshot(snapshot)
 
     def diff_handler(self,data,(host,port)):
         time = self.client.gamestate.time
