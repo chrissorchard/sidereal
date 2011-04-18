@@ -121,7 +121,14 @@ class PacketReciever(protocol.DatagramProtocol):
         except ValueError as e:
             print e
             return
+        if "ACK" not in flag_unpack(flags):
+            ack_packet = self.create_ack(sequence)
+            self.transport.write(ack_packet,(host,port))
+
         self.handler.handle(message,(host,port),sequence,flags)
+    def create_ack(self,sequence):
+        ackflag = flag_pack(['ACK'])
+        return calculate_packet("{}",sequence,ackflag)
 
 class PacketManager(object):
     def __init__(self,protocol):

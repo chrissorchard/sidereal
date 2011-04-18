@@ -47,8 +47,9 @@ class Connection(protocol.DatagramProtocol):
             return
 
         print "Sequence:{},Flags:{},Length:{},Data:{}".format(sequence,flags,length,data.strip("\n"))
-        ackflag = sidereal.network.flag_pack(["ACK"])
-        self.transport.write(calculate_packet("{}",sequence,ackflag),(host,port))
+        if "ACK" not in sidereal.network.flag_unpack(flags):
+            ackflag = sidereal.network.flag_pack(["ACK"])
+            self.transport.write(calculate_packet("{}",sequence,ackflag),(host,port))
         handler.handle(json.loads(data),(host,port),sequence,flags)
 
 
