@@ -186,6 +186,16 @@ class Handler(object):
             #print "No action found for packet type: {0}".format(type)
             #TODO replace with Twisted failure?
             return False
+    def do_debug(self,data,(host,port)):
+        # An optional debug handler. Can be added like any other handler
+        action = data.get('action',None)
+        if action is None:
+            return
+        elif action == "gc":
+            # We'll burn this city down; manual garbarge collection GO
+            from gc import collect
+            collect()
+
 
 
 # flag variables
