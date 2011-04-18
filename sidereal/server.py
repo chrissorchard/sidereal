@@ -40,7 +40,7 @@ class Handler(sidereal.network.Handler):
         self.server.clients.discard((host,port))
 
 class Server(object):
-    def __init__(self,gamestate=None):
+    def __init__(self,gamestate=None,debug=False):
         # if not passed a gamestate, it'll make one of its own
         if gamestate is None:
             self.gamestate = sidereal.game.Gamestate()
@@ -48,7 +48,7 @@ class Server(object):
         #TODO Make it possible to change from default
         self.port = sidereal.network.DEFAULT_PORT
 
-        self.handler = Handler(self)
+        self.handler = Handler(self,debug)
         self.protocol = sidereal.network.PacketReciever(self.handler)
         self.manager = sidereal.network.PacketManager(self.protocol)
 

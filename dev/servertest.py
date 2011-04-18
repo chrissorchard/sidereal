@@ -1,6 +1,6 @@
 import sidereal.server
 
-s = sidereal.server.Server()
+s = sidereal.server.Server(debug=True)
 s.setup()
 
 import sidereal.universe as universe
