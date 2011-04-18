@@ -38,8 +38,8 @@ class Handler(sidereal.network.Handler):
         self.client = client
 
         # the server.Handler method will check this variable
-        self.type_action = {"snap":self.keyframe_handler}
-        self.type_action = {"diff":self.diff_handler}
+        self.type_action["snap"] = self.keyframe_handler
+        self.type_action["diff"] = self.diff_handler
 
         self.flag_handler['ACK'] = self.handle_ack
     def keyframe_handler(self,data,(host,port)):
