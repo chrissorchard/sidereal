@@ -19,7 +19,7 @@ class Client(object):
         # empty gamestate
 
         self.port = sidereal.network.DEFAULT_PORT
-        self.handler = Handler()
+        self.handler = Handler(self)
         self.protocol = sidereal.network.PacketReciever(self.handler)
         self.manager = sidereal.network.PacketManager(self.protocol)
     def setup(self):
@@ -32,7 +32,7 @@ class Client(object):
         self.manager.check()
         self.gamestate.tick()
 
-class Handler(sidereal.server.Handler):
+class Handler(sidereal.network.Handler):
     def __init__(self,client):
         self.client = client
 
