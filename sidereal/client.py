@@ -22,6 +22,12 @@ class Client(object):
         self.handler = Handler()
         self.protocol = sidereal.network.PacketReciever(self.handler)
         self.manager = sidereal.network.PacketManager(self.protocol)
+    def setup(self):
+        from twisted.internet import reactor
+        reactor.listenUDP(0,self.protocol)
+
+        self.gamestate_loop = LoopingCall(self.gamestate_wrapper)
+        self.gamestate_loop.start(0.01,now=False)
     def gamestate_wrapper(self):
         self.manager.check()
         self.gamestate.tick()
