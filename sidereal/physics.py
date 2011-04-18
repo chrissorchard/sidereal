@@ -66,6 +66,14 @@ class Body(object):
                             self.quaternion,
                             self.coord,
                             self.mass)
+    def unsnapshot(self,snapshot):
+        # Given a snapshot, set everything that needs to be set
+        velocity,avelocity,quaternion,coord,mass = snapshot
+        self.velocity = velocity
+        self.avelocity = avelocity
+        self.quaternion = quaternion
+        self.coord = coord
+        self.mass = mass
 
 _fields = ['velocity','avelocity','quaternion','coord','mass']
 BodySnapshot = collections.namedtuple("BodySnapshot",_fields)
