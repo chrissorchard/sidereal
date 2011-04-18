@@ -98,9 +98,14 @@ class PseudoHeader(object):
                 raise BadDigest
 
         return sequence,hash,flags,length,data[cls.length:]
+    @classmethod
+    def pretty(cls,data):
+        sequence,hash,flags,length,data = cls.unpack(data,True)
+        return "Sequence:{0},Flags:{1},Length:{2},Data:{3}".format(sequence,flags,length,data.strip("\n"))
 
 calculate_packet = PseudoHeader.calculate
 unpack_packet = PseudoHeader.unpack
+pretty_packet = PseudoHeader.pretty
 
 # packet handler
 class PacketReciever(protocol.DatagramProtocol):

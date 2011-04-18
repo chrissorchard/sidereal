@@ -46,7 +46,7 @@ class Connection(protocol.DatagramProtocol):
             print e
             return
 
-        print "Sequence:{},Flags:{},Length:{},Data:{}".format(sequence,flags,length,data.strip("\n"))
+        print sidereal.network.pretty_packet(payload)
         if "ACK" not in sidereal.network.flag_unpack(flags):
             ackflag = sidereal.network.flag_pack(["ACK"])
             self.transport.write(calculate_packet("{}",sequence,ackflag),(host,port))
