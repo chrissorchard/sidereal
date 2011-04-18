@@ -40,6 +40,8 @@ class Handler(sidereal.network.Handler):
         # the server.Handler method will check this variable
         self.type_action = {"snap":self.keyframe_handler}
         self.type_action = {"diff":self.diff_handler}
+
+        self.flag_handler['ACK'] = self.handle_ack
     def keyframe_handler(self,data,(host,port)):
         # FIXME Currently unused  #
         client_time = self.client.gamestate.time
@@ -53,6 +55,10 @@ class Handler(sidereal.network.Handler):
 
         body = gamestate.get_body(id)
         body.unsnapshot(snapshot)
+
+    # UGGGH repeated code
+    def handle_ack(self,data,(host,port),sequence,flags):
+        self.client.manager.ack_packet(sequence)
 
     def diff_handler(self,data,(host,port)):
         time = self.client.gamestate.time
