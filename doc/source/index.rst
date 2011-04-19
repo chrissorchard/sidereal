@@ -16,6 +16,7 @@ Contents:
 
    overview
    gameloop
+   network
    ships
 
 
