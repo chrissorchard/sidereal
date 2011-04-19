@@ -65,8 +65,6 @@ class BadLength(Exception):
     pass
 
 class PseudoHeader(object):
-    format = ">H16sBH"
-    length = struct.calcsize(format)
     """
     our header consists of:
 
@@ -75,6 +73,8 @@ class PseudoHeader(object):
     unsigned short - flags
     unsigned short - length of packet, header + payload
     """
+    format = ">H16sBH"
+    length = struct.calcsize(format)
 
     @classmethod
     def calculate(cls,data,sequence=0,flagnum=0):
@@ -120,7 +120,7 @@ pretty_packet = PseudoHeader.pretty
 # packet handler
 class PacketReciever(protocol.DatagramProtocol):
     def __init__(self,handler):
-        # has to have a .handle method
+        """handler - has to have a .handle method"""
         self.handler = handler
 
     def datagramReceived(self, datagram, (host,port)):
@@ -234,7 +234,7 @@ flags['RAINBOW'] = 16
 flags['AWESOME'] = 128
 
 def flag_unpack(i):
-    # given an integer, return a set of keys
+    """given an integer, return a set of keys"""
     keys = set()
     for flag,value in flags.items():
         if i & value == value:
@@ -242,8 +242,8 @@ def flag_unpack(i):
     return keys
 
 def flag_pack(s):
-    # given a set, or something that support "in"
-    # returns an integer
+    """given a set, or something that supports .pop()
+    returns an integer"""
     value = 0
     while s:
         flag = s.pop()
