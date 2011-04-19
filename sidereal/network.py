@@ -15,7 +15,13 @@ DEFAULT_PORT = 25005
 # random network utlity classes and functions
 
 class DigestDict(dict):
+    """This is a docstring.
+
+    This whole class is unused."""
     def digest(self):
+        """This is also a docstring.
+
+        """
         # Given a dictionary, inserts a json digest, assuming that
         # the element 'digest' contains N zeros, and it's printed
         # with indent 4, sorted
