@@ -15,18 +15,18 @@ if args.fixed_seed:
     random.seed(100)
 
 
-import sidereal.physics as odeobjects
+import sidereal.physics as physics
 import sidereal.turtles as turtles
 
 d = turtles.Display()
 d.autocoord_display = {'coord'}
-world = odeobjects.PhysicsWorld()
+world = physics.World()
 
 world.setGravity((0,-9.81,0))
 for i in range(args.ball_number):
-    ball = odeobjects.PhysicsObject(world)
-    ball.body.setPosition((random.randint(-100,100),random.randint(0,100),0))
-    ball.body.setLinearVel((random.randint(-30,50),random.randint(20,40),0))
+    ball = physics.Body(world)
+    ball.position = ((random.randint(-100,100),random.randint(0,100),0))
+    ball.velocity = ((random.randint(-30,50),random.randint(20,40),0))
     d.add(ball)
 
 
