@@ -1,4 +1,5 @@
 import logging
+import argparse
 logging.basicConfig(level=logging.DEBUG)
 
 import sidereal.client
@@ -8,7 +9,13 @@ import sidereal.panda as panda
 c = sidereal.client.Client()
 c.setup()
 
-HOST,PORT = '127.0.0.1',25005
+parser = argparse.ArgumentParser()
+parser.add_argument('HOST',default='127.0.0.1',nargs='?')
+parser.add_argument('PORT',type=int,default=25005,nargs='?')
+parser.add_argument('--autoconnect','-a',action='store_true',default=False)
+
+args = parser.parse_args()
+HOST,PORT = args.HOST, args.PORT
 
 from twisted.internet import task, reactor, stdio
 
@@ -51,5 +58,8 @@ task.LoopingCall(PandaUpdater(engine,c.gamestate).step).start(0.01)
 # and set up IO
 input = sidereal.network.StdinInput(c,(HOST,PORT))
 stdio.StandardIO(input)
+
+if args.autoconnect:
+    c.manager.send_packet({"type":"knock"},(HOST,PORT))
 
 reactor.run()
