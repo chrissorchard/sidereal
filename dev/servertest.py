@@ -16,6 +16,6 @@ def new(velocity=(0,1,0)):
 new()
 
 from twisted.internet import reactor
-reactor.callLater(4,new,(3,-4,7))
-reactor.callLater(8,new,(9,-1.5,3))
+reactor.callLater(4,new,(1,-1,2))
+reactor.callLater(8,new,(3,-0.5,1))
 reactor.run()
