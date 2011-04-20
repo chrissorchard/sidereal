@@ -91,6 +91,7 @@ class Server(object):
 
         if prepare_snapshot:
             snapshot = self.gamestate.physics_snapshot()
+            worldsize = len(snapshot)
             snapmessages = []
             for id,physics in snapshot.items():
                 snapmessage = DigestDict()
@@ -98,6 +99,7 @@ class Server(object):
                 snapmessage['id'] = id
                 snapmessage['time'] = self.gamestate.time
                 snapmessage['snapshot'] = physics
+                snapmessage['total'] = worldsize
                 snapmessages.append(snapmessage)
 
         if not keyframe_time and not diff_empty:

@@ -32,6 +32,8 @@ The server packets have the following attributes:
    will almost (except for perfect conditions, and even then) never be
    in perfect step, it is important to timestamp any changes to an
    object.
+ * total - The total number of agents/gasau/in game objects in the world,
+   including this one.
 
 An ACK packet has an empty JSON object, the sequence number set to the
 packet it is replying to, and (unsurpringly) the ACK flag set.
