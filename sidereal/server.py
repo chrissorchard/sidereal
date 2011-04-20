@@ -113,6 +113,8 @@ class Server(object):
             if keyframe_time or unsynced:
                 if unsynced:
                     self.unsynced.remove((host,port))
+                    for snapmessage in snapmessages:
+                        snapmessage['inital'] = True
                 # transmit the snapshot
                 for snapmessage in snapmessages:
                     self.manager.send_packet(snapmessage,(host,port))

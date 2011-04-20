@@ -30,6 +30,10 @@ Servers currently send (with other attributes):
        object.
      * total - The total number of agents/gasau/in game objects in the world,
        including this one.
+     * initial - These snapshots are the inital ones a server sends, and
+       thus, their time is kosher, and should be adjusted to. In its
+       absense, this attribute is False.
+
  * diff - A "diff" of a particular object, which contains a subset of
    the object's traits which should be updated.
  * hearbeat - A heartbeat from the server.
