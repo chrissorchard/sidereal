@@ -22,7 +22,12 @@ class StdinInput(basic.LineReceiver):
 
         # of course, we're loading this data, when we're about to
         # dump it in a second.
-        c.manager.send_packet(json.loads(line),(HOST,PORT))
+        try:
+            j = json.loads(line)
+        except ValueError as e:
+            logging.warning(e)
+        else:
+            c.manager.send_packet(j,(HOST,PORT))
 
 
 stdio.StandardIO(StdinInput())
