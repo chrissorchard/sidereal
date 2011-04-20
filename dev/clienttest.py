@@ -14,7 +14,9 @@ HOST,PORT = "127.0.0.1",25005
 
 class StdinInput(basic.LineReceiver):
     delimiter = os.linesep
-
+    def __init__(self,client,(host,port)):
+        self.client = client
+        self.host,self.port = (host,port)
     def connectionMade(self):
         pass
     def lineReceived(self, line):
@@ -27,10 +29,10 @@ class StdinInput(basic.LineReceiver):
         except ValueError as e:
             logging.warning(e)
         else:
-            c.manager.send_packet(j,(HOST,PORT))
+            self.client.manager.send_packet(j,(self.host,self.port))
 
 
-stdio.StandardIO(StdinInput())
+stdio.StandardIO(StdinInput(c,(HOST,PORT)))
 
 from twisted.internet import reactor
 reactor.run()
