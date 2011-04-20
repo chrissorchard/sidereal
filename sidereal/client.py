@@ -43,20 +43,38 @@ class Handler(sidereal.network.Handler):
         self.type_action["diff"] = self.diff_handler
 
         self.flag_handler['ACK'] = self.handle_ack
+
+        self.keyframe_assembler = {}
     def keyframe_handler(self,data,(host,port)):
         # FIXME Currently unused  #
         client_time = self.client.gamestate.time
-        server_time = data['time']
         #-------------------------#
 
-        gamestate = self.client.gamestate
+        server_time = data['time']
+        server_total = data['total']
 
+        # Okay, a keyframe is made up out of all of the snapshots
+        if server_time not in self.keyframe_assembler:
+            self.keyframe_assembler[server_time] = server_total, {}
+
+        total, snapshotdict = self.keyframe_assembler[server_time]
+
+        # Add id -> snapshot, to snapshotdict
         id = data['id']
         snapshot = sidereal.physics.BodySnapshot(*data['snapshot'])
 
-        body = gamestate.get_body(id)
-        logging.debug(body.snapshot())
-        body.unsnapshot(snapshot)
+        snapshotdict[id] = snapshot
+
+        # Now check if snapshot dict is full
+        if len(snapshotdict) == total:
+            # push it to the gamestate
+            gamestate = self.client.gamestate
+            for id,snapshot in snapshotdict.items():
+                body = gamestate.get_body(id)
+                logging.debug(body.snapshot())
+                body.unsnapshot(snapshot)
+
+            del self.keyframe_assembler[server_time]
 
     # UGGGH repeated code
     def handle_ack(self,data,(host,port),sequence,flags):
