@@ -4,6 +4,8 @@ import hashlib
 import struct
 import warnings
 import logging
+logger = logging.getLogger('sidereal.network')
+packetlogger = logger.getChild('packets')
 
 from twisted.internet import protocol
 from twisted.protocols import basic
@@ -128,7 +130,7 @@ class PacketReciever(protocol.DatagramProtocol):
     def datagramReceived(self, datagram, (host,port)):
         try:
             sequence,hash,flags,length,data = unpack_packet(datagram)
-            logging.debug(pretty_packet(datagram))
+            packetlogger.debug(pretty_packet(datagram))
             message = json.loads(data)
         except BadLength as e:
             print e
@@ -173,7 +175,7 @@ class PacketManager(object):
         if sequence in self.sent_packets:
             del self.sent_packets[sequence]
         else:
-            logging.warning("WTF, {0} isn't a packet we've sent".format(sequence))
+            logger.warning("WTF, {0} isn't a packet we've sent".format(sequence))
     def check(self):
         """Check that we've been replied to."""
         # FIXME Temporary fix for unacked. we will retrnsmit them
@@ -183,7 +185,7 @@ class PacketManager(object):
             packetcount[1] += 1
             if packetcount[1] > TOO_LONG:
                 pretty = pretty_packet(packetcount[0])
-                logging.warning("unacknowledged packet: {0}".format(pretty))
+                logger.warning("unacknowledged packet: {0}".format(pretty))
                 remove.add(sequence)
         while remove:
             item = remove.pop()
