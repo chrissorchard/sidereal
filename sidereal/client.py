@@ -74,6 +74,9 @@ class Handler(sidereal.network.Handler):
                 logging.debug(body.snapshot())
                 body.unsnapshot(snapshot)
 
+            if data.get('inital',False):
+                self.client.gamestate.time = server_time
+
             del self.keyframe_assembler[server_time]
 
     # UGGGH repeated code
