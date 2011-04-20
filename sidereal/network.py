@@ -1,3 +1,4 @@
+import os
 import json
 import hashlib
 import struct
@@ -5,6 +6,7 @@ import warnings
 import logging
 
 from twisted.internet import protocol
+from twisted.protocols import basic
 
 from twisted.python.log import PythonLoggingObserver
 _observer = PythonLoggingObserver()
@@ -250,3 +252,28 @@ def flag_pack(s):
         if flag in flags:
             value = value | flags[flag]
     return value
+
+class StdinInput(basic.LineReceiver):
+    """Install by going
+    >>> instance = StdinInput(network,(host,port))
+    >>> twisted.internet.stdio.StandardIO(instance)
+
+    """
+    delimiter = os.linesep
+    def __init__(self,network,(host,port)):
+        # must have a .manager object
+        self.network = network
+        self.host,self.port = (host,port)
+    def connectionMade(self):
+        pass
+    def lineReceived(self, line):
+        # The dude typed a line. Send it.
+
+        # of course, we're loading this data, when we're about to
+        # dump it in a second.
+        try:
+            j = json.loads(line)
+        except ValueError as e:
+            logging.warning(e)
+        else:
+            self.network.manager.send_packet(j,(self.host,self.port))
