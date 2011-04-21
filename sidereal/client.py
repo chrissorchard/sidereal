@@ -53,6 +53,10 @@ class Handler(sidereal.network.Handler):
         server_time = data['time']
         server_total = data['total']
 
+        logmessage = "Time (client,server): {},{}".format(
+            client_time,server_time)
+        logger.getChild("handler").debug(logmessage)
+
         # Okay, a keyframe is made up out of all of the snapshots
         if server_time not in self.keyframe_assembler:
             self.keyframe_assembler[server_time] = server_total, {}
