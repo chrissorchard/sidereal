@@ -4,7 +4,7 @@ import hashlib
 import struct
 import warnings
 import logging
-logger = logging.getLogger('sidereal.network')
+logger = logging.getLogger(__name__)
 packetlogger = logger.getChild('packets')
 
 from twisted.internet import protocol
