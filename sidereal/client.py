@@ -2,7 +2,7 @@ import json
 import hashlib
 import sys
 import logging
-
+logger = logging.getLogger(__name__)
 from twisted.internet import protocol
 from twisted.internet.task import LoopingCall
 
@@ -71,7 +71,7 @@ class Handler(sidereal.network.Handler):
             gamestate = self.client.gamestate
             for id,snapshot in snapshotdict.items():
                 body = gamestate.get_body(id)
-                logging.debug(body.snapshot())
+                logger.debug(body.snapshot())
                 body.unsnapshot(snapshot)
 
             if data.get('inital',False):

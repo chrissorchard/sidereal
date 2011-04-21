@@ -168,7 +168,7 @@ class PacketManager(object):
         packet = calculate_packet(j+"\n",seq)
         size = len(packet)
         if size > 512:
-            logging.warning("Packet sent of size {0}".format(size))
+            logger.warning("Packet sent of size {0}".format(size))
         self.sent_packets[seq] = [packet,0]
         self.protocol.transport.write(packet,(host,port))
     def ack_packet(self,sequence):
@@ -276,6 +276,6 @@ class StdinInput(basic.LineReceiver):
         try:
             j = json.loads(line)
         except ValueError as e:
-            logging.warning(e)
+            logger.warning(e)
         else:
             self.network.manager.send_packet(j,(self.host,self.port))
