@@ -59,7 +59,7 @@ class Gameloop(object):
             pass
             # DO MAGIC
         self.update_navigation()
-        self.world.step(sidereal.physics.STEPSIZE)
+        self.world.step(sidereal.physics.DEFAULT_STEPSIZE)
         # if no visualreprs have been added, then nothing will happen
         self.update_visualrepr()
 
@@ -74,7 +74,7 @@ class Gameloop(object):
             navigation.navigate(body)
 
     def kaujul_tick(self):
-        self.world.step(sidereal.physics.STEPSIZE)
+        self.world.step(sidereal.physics.DEFAULT_STEPSIZE)
 
         # a worldsnapshot is a mapping of ingame ids to body snapshots
         worldsnapshot = {}
@@ -111,7 +111,7 @@ class Gameloop(object):
         self.kaujul += 1
 
 class Gamestate(object):
-    def __init__(self):
+    def __init__(self,stepsize=sidereal.physics.DEFAULT_STEPSIZE):
         self._physics = {}
         self._world = sidereal.physics.World()
 
@@ -120,6 +120,9 @@ class Gamestate(object):
 
         # UNIVERSE TIME, incremented on every tick.
         self.time = 0
+
+        # our step size. Best to change before you put anything inside
+        self.stepsize = stepsize
 
     def new_body(self,id):
         self._physics[id] = body = sidereal.physics.Body(self._world)
@@ -137,7 +140,7 @@ class Gamestate(object):
 
     def tick(self):
         # Returns physics diff
-        self._world.step(self.step_size)
+        self._world.step(self.stepsize)
         self.time += 1
         diff = {}
         while self._dirty:

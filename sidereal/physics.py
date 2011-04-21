@@ -94,4 +94,4 @@ class World(ode.World):
         self.setGravity((0,0,0))
 
 # constants
-STEPSIZE = 0.01
+DEFAULT_STEPSIZE = 0.01
