@@ -2,6 +2,9 @@ import logging
 import argparse
 logging.basicConfig(level=logging.DEBUG)
 
+# Ignore packet debugs
+logging.getLogger('sidereal.network.packets').setLevel("INFO")
+
 import sidereal.client
 import sidereal.network
 import sidereal.panda as panda
