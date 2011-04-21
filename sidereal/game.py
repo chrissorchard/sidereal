@@ -4,7 +4,6 @@ import ode
 import sidereal.navigation as navigation
 import sidereal.universe
 
-import sidereal.physics as physics
 import sidereal.physics
 
 class Gameloop(object):
@@ -41,7 +40,7 @@ class Gameloop(object):
             visualreprclass = sidereal.panda.Visualrepr
 
         gasau = sidereal.universe.id()
-        body = physics.Body(self.world)
+        body = sidereal.physics.Body(self.world)
 
         nav = navclass()
         ingame = ingameclass()
@@ -66,13 +65,13 @@ class Gameloop(object):
 
     def update_visualrepr(self):
         for gasau,visualrepr in self.gasau_visualrepr.items():
-            physics = self.gasau_physics[gasau]
-            visualrepr.coord = physics.coord
-            visualrepr.quaternion = physics.quaternion
+            body = self.gasau_physics[gasau]
+            visualrepr.coord = body.coord
+            visualrepr.quaternion = body.quaternion
     def update_navigation(self):
         for gasau,navigation in self.gasau_navigation.items():
-            physics = self.gasau_physics[gasau]
-            navigation.navigate(physics)
+            body = self.gasau_physics[gasau]
+            navigation.navigate(body)
 
     def kaujul_tick(self):
         self.world.step(sidereal.physics.STEPSIZE)
@@ -114,7 +113,7 @@ class Gameloop(object):
 class Gamestate(object):
     def __init__(self):
         self._physics = {}
-        self._world = physics.World()
+        self._world = sidereal.physics.World()
 
         # Set of all changed items for the diff.
         self._dirty = set()
@@ -123,7 +122,7 @@ class Gamestate(object):
         self.time = 0
 
     def new_body(self,id):
-        self._physics[id] = body = physics.Body(self._world)
+        self._physics[id] = body = sidereal.physics.Body(self._world)
         self.mark_dirty(id)
         return body
 
@@ -149,6 +148,6 @@ class Gamestate(object):
 
     def physics_snapshot(self):
         snapshot = {}
-        for id,physics in self._physics.items():
-            snapshot[id] = physics.snapshot()
+        for id,body in self._physics.items():
+            snapshot[id] = body.snapshot()
         return snapshot
