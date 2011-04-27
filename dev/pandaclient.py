@@ -56,7 +56,7 @@ for region in engine.win.getDisplayRegions():
     region.setCamera(mainview.camera_np)
 
 # engine set up
-task.LoopingCall(PandaUpdater(engine,c.gamestate).step).start(0.01)
+task.LoopingCall(PandaUpdater(engine,c.gamestate).step).start(0.1)
 
 # and set up IO
 input = sidereal.network.StdinInput(c,(HOST,PORT))
